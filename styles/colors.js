@@ -8,6 +8,6 @@ export const colors = {
     light: '#f8f9fa',
     dark: '#343a40',
     background: '#f0f0f0',
-    text: '#333333',
+    text: '#333334',
   };
   
