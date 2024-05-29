@@ -1,20 +1,31 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import * as React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import AppNavigator from './navigation/AppNavigator';
 
-export default function App() {
+import { initializeApp } from 'firebase/app';
+import { getAnalytics, isSupported } from "firebase/analytics";
+import firebaseConfig from './firebase/firebaseConfig'; // Import firebaseConfig
+
+async function initializeFirebase() {
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+
+  // Initialize Firebase Analytics
+  if (await isSupported()) {
+    getAnalytics(app);
+  }
+}
+
+function App() {
+  React.useEffect(() => {
+    initializeFirebase();
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <Text>Open app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <AppNavigator />
+    </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default App;

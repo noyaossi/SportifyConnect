@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "420525942863",
+    "project_id": "sportifyconnect-38c3a",
+    "storage_bucket": "sportifyconnect-38c3a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:420525942863:android:8d9789552b2fe49be8a23a",
+        "android_client_info": {
+          "package_name": "com.example.sportifyconnect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHTmmQzCYuJqatxd0MYO1aZdQEx7aDBp0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
