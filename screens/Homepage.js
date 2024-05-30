@@ -1,19 +1,15 @@
-// screens/Homepage.js
 import React from 'react';
-import { View, Text, Button } from 'react-native';
+import { View, Text } from 'react-native';
+import BottomNavigationBar from '../components/BottomNavigationBar'; // Import the BottomNavigationBar component
 
 const Homepage = ({ navigation }) => {
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Homepage Screen</Text>
-      <Button
-        title="Go to Events"
-        onPress={() => navigation.navigate('Events')}
-      />
+      
+      {/* Include the bottom navigation bar and pass down the navigation prop */}
+      <BottomNavigationBar navigation={navigation} />
     </View>
   );
 };
 
 export default Homepage;
-
-

@@ -5,6 +5,8 @@ import { registerUser } from '../firebase/auth'; // Import registerUser from fir
 const Register = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
 
   const handleRegister = async () => {
     try {
