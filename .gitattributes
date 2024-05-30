@@ -6,3 +6,7 @@
 *.jsx text eol=lf
 *.ts text eol=lf
 *.tsx text eol=lf
+
+# Ignore line ending normalization for binary files
+*.jpg -text
+*.png -text
