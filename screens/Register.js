@@ -1,6 +1,10 @@
+// screens/Register.js
+
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { registerUser } from '../firebase/auth'; // Import registerUser from firebase/auth
+import { addUser } from '../firebase/firestore'; // Import addUser from firebase/firestore
+
 
 const Register = ({ navigation }) => {
   const [firstname, setFirstName] = useState('');
@@ -16,6 +20,15 @@ const Register = ({ navigation }) => {
     try {
       const userCredential = await registerUser(email, password);
       const user = userCredential.user;
+      const userDetails = {
+        firstname,
+        lastname,
+        email,
+        mobilenumber,
+        profilepicture
+      };
+      await addUser(user.uid, userDetails);
+
       Alert.alert('Registration Successful', `Welcome ${user.email}`);
       // לאחר הרישום, נווט לעמוד ה-Login
       navigation.navigate('Login');

@@ -10,3 +10,16 @@
 # Ignore line ending normalization for binary files
 *.jpg -text
 *.png -text
+
+# Set default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Explicitly declare text files you want to always be normalized and converted 
+# to native line endings on checkout.
+*.js      text
+*.jsx     text
+*.json    text
+*.css     text
+*.html    text
+*.md      text
+*.svg     text
