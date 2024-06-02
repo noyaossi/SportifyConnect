@@ -14,12 +14,13 @@ const BottomNavigationBar = () => {
 
   return (
     <View style={styles.container}>
+       <TouchableOpacity onPress={() => handleNavigate('Profile')}>
+        <Image source={require('../assets/images/profile.jpg')} style={styles.icon} />
+      </TouchableOpacity>
       <TouchableOpacity onPress={() => handleNavigate('Homepage')}>
         <Image source={require('../assets/images/home.jpg')} style={styles.icon} />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleNavigate('Profile')}>
-        <Image source={require('../assets/images/profile.jpg')} style={styles.icon} />
-      </TouchableOpacity>
+     
       <TouchableOpacity onPress={() => handleNavigate('Events')}>
         <Image source={require('../assets/images/events.png')} style={styles.icon} />
       </TouchableOpacity>

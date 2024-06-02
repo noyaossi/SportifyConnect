@@ -1,7 +1,9 @@
 // screens/CreateEvent.js
 
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Image, Platform } from 'react-native';
+import * as ImagePicker from 'expo-image-picker'; // Import ImagePicker module
+
 import { addEvent } from '../firebase/firestore'; // Ensure correct import
 
 const CreateEvent = ({ navigation }) => {
@@ -12,7 +14,35 @@ const CreateEvent = ({ navigation }) => {
   const [time, setTime] = useState('');
   const [participants, setParticipants] = useState('');
   const [description, setDescription] = useState('');
-  const [picture, setPicture] = useState('');
+  const [picture, setPicture] = useState(null); // State to store the selected image URI
+
+  // Function to handle picking an image from device gallery
+const pickImage = async () => {
+  let result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [4, 3],
+    quality: 1,
+  });
+
+  if (!result.cancelled) {
+    setPicture(result.uri); // Set the picture state with the URI of the selected image
+  }
+};
+
+// Function to handle taking a photo with the camera
+const takePhoto = async () => {
+  let result = await ImagePicker.launchCameraAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [4, 3],
+    quality: 1,
+  });
+
+  if (!result.cancelled) {
+    setPicture(result.uri); // Set the picture state with the URI of the taken photo
+  }
+};
 
   const handleSubmit = async () => {
     const newEvent = {
@@ -80,12 +110,11 @@ const CreateEvent = ({ navigation }) => {
         value={description}
         onChangeText={setDescription}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Upload Picture"
-        value={picture}
-        onChangeText={setPicture}
-      />
+       <View style={styles.uploadPictureContainer}>
+        {picture && <Image source={{ uri: picture }} style={styles.image} />}
+        <Button title="Select from Gallery" onPress={pickImage} />
+        {Platform.OS === 'ios' && <Button title="Take Photo" onPress={takePhoto} />}
+      </View>
       <Button title="Submit" onPress={handleSubmit} />
     </View>
   );
@@ -108,6 +137,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 12,
     padding: 8,
+  },
+  uploadPictureContainer: {
+    marginBottom: 12,
+  },
+  image: {
+    width: 200,
+    height: 200,
+    resizeMode: 'cover',
+    marginBottom: 12,
   },
 });
 

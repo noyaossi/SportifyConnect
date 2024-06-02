@@ -1,6 +1,6 @@
 // firebase/firestore.js
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc  } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, getDocs   } from 'firebase/firestore';
 import firebaseConfig from './firebaseConfig';
 
 // Initialize Firebase only if it hasn't been initialized yet
@@ -56,6 +56,19 @@ export const updateUser = async (uid, userDetails) => {
     await updateDoc(doc(firestore, 'users', uid), userDetails);
   } catch (error) {
     console.error('Error updating user:', error);
+    throw error;
+  }
+};
+
+// Function to fetch events data from Firestore
+export const getEvents = async () => {
+  try {
+    const eventsCollection = collection(firestore, 'events');
+    const eventsSnapshot = await getDocs(eventsCollection);
+    const eventsData = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return eventsData;
+  } catch (error) {
+    console.error('Error fetching events:', error);
     throw error;
   }
 };

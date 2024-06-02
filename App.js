@@ -1,6 +1,8 @@
 // App.js
 
 import * as React from 'react';
+
+
 import { NavigationContainer } from '@react-navigation/native';
 import { ActivityIndicator, View, Text } from 'react-native';
 import { getApps, initializeApp } from 'firebase/app';
