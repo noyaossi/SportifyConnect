@@ -25,7 +25,7 @@ const Login = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Login Screen</Text>
+     
       <TextInput
         placeholder="Email"
         value={email}
@@ -45,5 +45,6 @@ const Login = ({ navigation }) => {
     </View>
   );
 };
+
 
 export default Login;

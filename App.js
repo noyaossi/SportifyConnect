@@ -10,6 +10,8 @@ import AppNavigator from './navigation/AppNavigator';
 import AuthNavigator from './navigation/AuthNavigator';
 import { checkLoginStatus } from './firebase/auth';
 import BottomNavigationBar from './components/BottomNavigationBar'; // Import your BottomNavigationBar component
+import { getFirestore } from 'firebase/firestore';
+
 
 
 async function initializeFirebase() {

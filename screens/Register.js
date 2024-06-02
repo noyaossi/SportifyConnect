@@ -3,8 +3,12 @@ import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { registerUser } from '../firebase/auth'; // Import registerUser from firebase/auth
 
 const Register = ({ navigation }) => {
+  const [firstname, setFirstName] = useState('');
+  const [lastname, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [mobilenumber, setMobileNumber] = useState('');
   const [password, setPassword] = useState('');
+  const [profilepicture, setProfilePicture] = useState('');
   const [error, setError] = useState('');
 
 
@@ -26,18 +30,48 @@ const Register = ({ navigation }) => {
       <Text style={styles.title}>Register</Text>
       <TextInput
         style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
+        placeholder="First Name"
+        value={firstname}
+        onChangeText={setFirstName}
+        keyboardType="first-name"
         autoCapitalize="none"
       />
+      <TextInput
+        style={styles.input}
+        placeholder="Last Name"
+        value={lastname}
+        onChangeText={setLastName}
+        keyboardType="last-name"
+        autoCapitalize="none"
+      /><TextInput
+      style={styles.input}
+      placeholder="Email"
+      value={email}
+      onChangeText={setEmail}
+      keyboardType="email-address"
+      autoCapitalize="none"
+    /><TextInput
+    style={styles.input}
+    placeholder="Mobile Number"
+    value={mobilenumber}
+    onChangeText={setMobileNumber}
+    keyboardType="mobile-number"
+    autoCapitalize="none"
+  />
       <TextInput
         style={styles.input}
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        autoCapitalize="none"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Profile Picture"
+        value={profilepicture}
+        onChangeText={setProfilePicture}
+        keyboardType="profile-picture"
         autoCapitalize="none"
       />
       <Button title="Register" onPress={handleRegister} />
