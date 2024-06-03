@@ -1,7 +1,7 @@
 // screens/Homepage.js
 
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, Text, StyleSheet, Button, RefreshControl } from 'react-native';
+import { View, FlatList, Text, StyleSheet, Button, RefreshControl, Image  } from 'react-native';
 import { getEvents, registerForEvent } from '../firebase/firestore'; // Import function to fetch events and register for events from Firestore
 import { useAuth } from '../contexts/AuthContext'; // Import AuthContext to get current user
 
@@ -53,6 +53,7 @@ const Homepage = ({ navigation }) => {
         <Text style={styles.eventName}>{item.eventName}</Text>
         <Text style={styles.eventDetails}>{item.location}, {item.date}, {item.time}</Text>
       </View>
+      {item.picture && <Image source={{ uri: item.picture }} style={styles.eventImage} />}
       <Button
         title="Register"
         onPress={() => handleRegister(item.id)}
@@ -100,6 +101,12 @@ const styles = StyleSheet.create({
   eventDetails: {
     fontSize: 16,
     color: '#888',
+  },
+  eventImage: {
+    width: 100,
+    height: 100,
+    resizeMode: 'cover',
+    borderRadius: 10,
   },
 });
 

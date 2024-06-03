@@ -11,6 +11,8 @@ import BottomNavigationBar from './components/BottomNavigationBar'; // Import yo
 import { AuthProvider } from './contexts/AuthContext'; // Import AuthProvider
 import { getFirestore } from 'firebase/firestore';
 
+
+
 async function initializeFirebase() {
   if (!getApps().length) {
     const app = initializeApp(firebaseConfig);

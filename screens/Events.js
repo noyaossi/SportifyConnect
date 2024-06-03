@@ -1,7 +1,7 @@
 // screens/Events.js
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { getEvents, getRegisteredEvents } from '../firebase/firestore'; // Import function to fetch events and registered events from Firestore
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth to get the current user
 import { Ionicons } from '@expo/vector-icons'; // Assuming you have installed expo vector icons
@@ -44,8 +44,11 @@ const Events = ({ navigation }) => {
   // Render each event item in a FlatList
   const renderEventItem = ({ item }) => (
     <View style={styles.eventItem}>
-      <Text style={styles.eventName}>{item.eventName}</Text>
-      <Text style={styles.eventDetails}>{item.location}, {item.date}, {item.time}</Text>
+      <View style={styles.eventDetailsContainer}>
+        <Text style={styles.eventName}>{item.eventName}</Text>
+        <Text style={styles.eventDetails}>{item.location}, {item.date}, {item.time}</Text>
+      </View>
+      {item.picture && <Image source={{ uri: item.picture }} style={styles.eventImage} />}
     </View>
   );
 
@@ -89,6 +92,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  eventDetailsContainer: {
+    flex: 1,
+    marginRight: 10,
   },
   eventName: {
     fontSize: 18,
@@ -97,6 +107,12 @@ const styles = StyleSheet.create({
   eventDetails: {
     fontSize: 16,
     color: '#888',
+  },
+  eventImage: {
+    width: 100,
+    height: 100,
+    resizeMode: 'cover',
+    borderRadius: 10,
   },
   fab: {
     position: 'absolute',
