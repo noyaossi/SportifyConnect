@@ -5,6 +5,10 @@ import { View, Text, TextInput, Button, StyleSheet, Image, Platform } from 'reac
 import * as ImagePicker from 'expo-image-picker'; // Import ImagePicker module
 
 import { addEvent } from '../firebase/firestore'; // Ensure correct import
+import { getStorage, ref, uploadFile, getDownloadURL } from 'firebase/storage';
+
+
+
 
 const CreateEvent = ({ navigation }) => {
   const [eventName, setEventName] = useState('');
@@ -14,21 +18,47 @@ const CreateEvent = ({ navigation }) => {
   const [time, setTime] = useState('');
   const [participants, setParticipants] = useState('');
   const [description, setDescription] = useState('');
-  const [picture, setPicture] = useState(null); // State to store the selected image URI
+  const [picture, setPicture] = useState(' '); // State to store the selected image URI
 
   // Function to handle picking an image from device gallery
-const pickImage = async () => {
-  let result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    allowsEditing: true,
-    aspect: [4, 3],
-    quality: 1,
-  });
-
-  if (!result.cancelled) {
-    setPicture(result.uri); // Set the picture state with the URI of the selected image
-  }
-};
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+  
+    if (!result.cancelled) {
+      try {
+        const imageRef = ref(storage, 'images/' + result.uri.split('/').pop()); // Create a reference to the image in Firebase Storage
+        await uploadFile(imageRef, result.uri); // Upload the image
+        const imageUrl = await getDownloadURL(imageRef); // Get the URL of the uploaded image
+  
+        // Now you have the imageUrl, you can include it in your event object
+        const newEvent = {
+          eventName,
+          sportType,
+          location,
+          date,
+          time,
+          participants,
+          description,
+          picture: imageUrl, // Include the image URL in your event object
+        };
+  
+        try {
+          const eventId = await addEvent(newEvent); // Add the event to Firestore
+          console.log('Event created with ID: ', eventId);
+          navigation.navigate('Events'); // Navigate back to the events screen or wherever you want to go after creating the event
+        } catch (error) {
+          console.error('Error adding event: ', error);
+        }
+      } catch (error) {
+        console.error('Error uploading image:', error);
+      }
+    }
+  };
 
 // Function to handle taking a photo with the camera
 const takePhoto = async () => {
@@ -110,11 +140,13 @@ const takePhoto = async () => {
         value={description}
         onChangeText={setDescription}
       />
-       <View style={styles.uploadPictureContainer}>
-        {picture && <Image source={{ uri: picture }} style={styles.image} />}
-        <Button title="Select from Gallery" onPress={pickImage} />
-        {Platform.OS === 'ios' && <Button title="Take Photo" onPress={takePhoto} />}
-      </View>
+      <TextInput
+        style={styles.input}
+        placeholder="Picture"
+        value={description}
+        onChangeText={setPicture}
+      />
+       
       <Button title="Submit" onPress={handleSubmit} />
     </View>
   );
