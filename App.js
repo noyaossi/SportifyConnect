@@ -1,10 +1,6 @@
-// App.js
-
 import * as React from 'react';
-
-
 import { NavigationContainer } from '@react-navigation/native';
-import { ActivityIndicator, View, Text } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { getApps, initializeApp } from 'firebase/app';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 import firebaseConfig from './firebase/firebaseConfig';
@@ -12,9 +8,8 @@ import AppNavigator from './navigation/AppNavigator';
 import AuthNavigator from './navigation/AuthNavigator';
 import { checkLoginStatus } from './firebase/auth';
 import BottomNavigationBar from './components/BottomNavigationBar'; // Import your BottomNavigationBar component
+import { AuthProvider } from './contexts/AuthContext'; // Import AuthProvider
 import { getFirestore } from 'firebase/firestore';
-
-
 
 async function initializeFirebase() {
   if (!getApps().length) {
@@ -56,10 +51,12 @@ function App() {
   }
 
   return (
-    <NavigationContainer>
-      {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}
-      <BottomNavigationBar />
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
+        {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}
+        <BottomNavigationBar />
+      </NavigationContainer>
+    </AuthProvider>
   );
 }
 

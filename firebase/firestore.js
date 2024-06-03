@@ -1,6 +1,5 @@
-// firebase/firestore.js
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, getDocs   } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, getDocs, query, where } from 'firebase/firestore';
 import firebaseConfig from './firebaseConfig';
 
 // Initialize Firebase only if it hasn't been initialized yet
@@ -69,6 +68,50 @@ export const getEvents = async () => {
     return eventsData;
   } catch (error) {
     console.error('Error fetching events:', error);
+    throw error;
+  }
+};
+
+// Function to register for an event
+export const registerForEvent = async (userId, eventId) => {
+  try {
+    const userRef = doc(firestore, 'users', userId);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) {
+      throw new Error('User does not exist');
+    }
+    
+    const userData = userSnap.data();
+    const registeredEvents = userData.registeredEvents || [];
+    registeredEvents.push(eventId);
+
+    await updateDoc(userRef, { registeredEvents });
+  } catch (error) {
+    console.error('Error registering for event:', error);
+    throw error;
+  }
+};
+
+// Function to get registered events for a user
+export const getRegisteredEvents = async (userId) => {
+  try {
+    const userRef = doc(firestore, 'users', userId);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) {
+      throw new Error('User does not exist');
+    }
+
+    const userData = userSnap.data();
+    const registeredEventIds = userData.registeredEvents || [];
+
+    const eventsCollection = collection(firestore, 'events');
+    const q = query(eventsCollection, where('__name__', 'in', registeredEventIds));
+    const eventsSnapshot = await getDocs(q);
+
+    const eventsData = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return eventsData;
+  } catch (error) {
+    console.error('Error fetching registered events:', error);
     throw error;
   }
 };

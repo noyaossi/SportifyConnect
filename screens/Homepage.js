@@ -1,43 +1,63 @@
 // screens/Homepage.js
 
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, Text, StyleSheet, RefreshControl } from 'react-native';
-import BottomNavigationBar from '../components/BottomNavigationBar'; // Import the BottomNavigationBar component
-import { getEvents } from '../firebase/firestore'; // Import function to fetch events from Firestore
-import { useFocusEffect } from '@react-navigation/native';
-
-
+import { View, FlatList, Text, StyleSheet, Button, RefreshControl } from 'react-native';
+import { getEvents, registerForEvent } from '../firebase/firestore'; // Import function to fetch events and register for events from Firestore
+import { useAuth } from '../contexts/AuthContext'; // Import AuthContext to get current user
 
 const Homepage = ({ navigation }) => {
   const [events, setEvents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const { currentUser } = useAuth(); // Get the current user from AuthContext
 
-  const fetchEvents = async () => {
+  const onRefresh = async () => {
+    setRefreshing(true);
     try {
       const eventsData = await getEvents(); // Fetch events data from Firestore
       setEvents(eventsData); // Update state with fetched events
     } catch (error) {
       console.error('Error fetching events:', error);
+    } finally {
+      setRefreshing(false);
     }
   };
 
-  const onRefresh = React.useCallback(async () => {
-    setRefreshing(true);
-    await fetchEvents();
-    setRefreshing(false);
+  useEffect(() => {
+    // Fetch events data when the component mounts
+    const fetchEvents = async () => {
+      try {
+        const eventsData = await getEvents(); // Fetch events data from Firestore
+        setEvents(eventsData); // Update state with fetched events
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
+    };
+
+    fetchEvents(); // Call fetchEvents function
   }, []);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchEvents(); // Fetch events data when the screen comes into focus
-    }, [])
-  );
+  const handleRegister = async (eventId) => {
+    try {
+      await registerForEvent(currentUser.uid, eventId); // Register user for the event
+      alert('Registered successfully!');
+    } catch (error) {
+      console.error('Error registering for event:', error);
+      alert('Error registering for event.');
+    }
+  };
 
   // Render each event item in a FlatList
   const renderEventItem = ({ item }) => (
     <View style={styles.eventItem}>
-      <Text style={styles.eventName}>{item.eventName}</Text>
-      <Text style={styles.eventDetails}>{item.location}, {item.date}, {item.time}</Text>
+      <View style={styles.eventDetailsContainer}>
+        <Text style={styles.eventName}>{item.eventName}</Text>
+        <Text style={styles.eventDetails}>{item.location}, {item.date}, {item.time}</Text>
+      </View>
+      <Button
+        title="Register"
+        onPress={() => handleRegister(item.id)}
+        color="#ADD8E6" // Light blue color
+      />
     </View>
   );
 
@@ -48,7 +68,6 @@ const Homepage = ({ navigation }) => {
         renderItem={renderEventItem}
         keyExtractor={(item) => item.id} // Assuming each event has a unique identifier
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-
       />
     </View>
   );
@@ -66,11 +85,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  eventDetailsContainer: {
+    flex: 1,
+    marginRight: 10,
   },
   eventName: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
   },
   eventDetails: {
     fontSize: 16,
