@@ -12,7 +12,6 @@ const CreateEvent = ({ navigation }) => {
   const [sportType, setSportType] = useState('');
   const [location, setLocation] = useState('');
   const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
   const [participants, setParticipants] = useState('');
   const [description, setDescription] = useState('');
   const [picture, setPicture] = useState(null);
@@ -58,7 +57,7 @@ const CreateEvent = ({ navigation }) => {
 
   const handleSubmit = async () => {
     try {
-      console.log('Submitting event:', eventName, sportType, location, date, time, participants, description);
+      console.log('Submitting event:', eventName, sportType, location, date, participants, description);
 
       let pictureUrl = null;
       if (picture) {
@@ -72,7 +71,6 @@ const CreateEvent = ({ navigation }) => {
         sportType,
         location,
         date,
-        time,
         participants,
         description,
         picture: pictureUrl,
@@ -118,12 +116,6 @@ const CreateEvent = ({ navigation }) => {
           placeholder="Date"
           value={date}
           onChangeText={setDate}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Time"
-          value={time}
-          onChangeText={setTime}
         />
         <TextInput
           style={styles.input}

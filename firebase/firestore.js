@@ -106,12 +106,18 @@ export const getRegisteredEvents = async (userId) => {
     const userData = userSnap.data();
     const registeredEventIds = userData.registeredEvents || [];
 
-    const eventsCollection = collection(firestore, 'events');
-    const q = query(eventsCollection, where('__name__', 'in', registeredEventIds));
-    const eventsSnapshot = await getDocs(q);
 
-    const eventsData = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return eventsData;
+    if (registeredEventIds.length > 0) {
+      const eventsCollection = collection(firestore, 'events');
+      const q = query(eventsCollection, where('_name_', 'in', registeredEventIds));
+      const eventsSnapshot = await getDocs(q);
+      const eventsData = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return eventsData;
+    } else {
+      // Handle the case where registeredEventIds is empty
+      // Option 1: Return an empty array
+      return [];
+    }
   } catch (error) {
     console.error('Error fetching registered events:', error);
     throw error;

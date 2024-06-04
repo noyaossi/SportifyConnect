@@ -28,11 +28,13 @@ const Events = ({ navigation }) => {
   useEffect(() => {
     // Fetch registered events when the current user changes
     const fetchRegisteredEvents = async () => {
-      if (!currentUser) return;
-
+      if (!currentUser || !currentUser.uid) return; // Exit if no currentUser or UID
+    
       try {
-        const registeredEventsData = await getRegisteredEvents(currentUser.uid); // Fetch registered events data from Firestore
-        setRegisteredEvents(registeredEventsData); // Update state with fetched registered events
+        const registeredEventsData = await getRegisteredEvents(currentUser.uid);
+        if (registeredEventsData.length !== 0) { // Check if data is not empty
+          setRegisteredEvents(registeredEventsData);
+        }
       } catch (error) {
         console.error('Error fetching registered events:', error);
       }
@@ -53,6 +55,7 @@ const Events = ({ navigation }) => {
   );
 
   return (
+
     <View style={styles.container}>
       <Text style={styles.header}>All Events:</Text>
       <FlatList
@@ -61,11 +64,15 @@ const Events = ({ navigation }) => {
         keyExtractor={(item) => item.id} // Assuming each event has a unique identifier
       />
       <Text style={styles.header}>Registered Events:</Text>
-      <FlatList
-        data={registeredEvents}
-        renderItem={renderEventItem}
-        keyExtractor={(item) => item.id} // Assuming each event has a unique identifier
-      />
+  {registeredEvents.length === 0 ? (
+    <Text>You are not currently registered for any events.</Text>
+  ) : (
+    <FlatList
+      data={registeredEvents}
+      renderItem={renderEventItem}
+      keyExtractor={(item) => item.id}
+    />
+  )}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => navigation.navigate('CreateEvent')}
@@ -73,14 +80,18 @@ const Events = ({ navigation }) => {
         <Ionicons name="add" size={30} color="white" />
       </TouchableOpacity>
     </View>
+
   );
 };
 
 const styles = StyleSheet.create({
+  
   container: {
     flex: 1,
     backgroundColor: 'white',
     padding: 20,
+    paddingBottom: 100, // Increased padding from 20 to 100
+
   },
   header: {
     fontSize: 24,

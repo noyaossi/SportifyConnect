@@ -51,7 +51,7 @@ const Homepage = ({ navigation }) => {
     <View style={styles.eventItem}>
       <View style={styles.eventDetailsContainer}>
         <Text style={styles.eventName}>{item.eventName}</Text>
-        <Text style={styles.eventDetails}>{item.location}, {item.date}, {item.time}</Text>
+        <Text style={styles.eventDetails}>{item.location}, {item.date}</Text>
       </View>
       {item.picture && <Image source={{ uri: item.picture }} style={styles.eventImage} />}
       <Button
