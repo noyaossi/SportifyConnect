@@ -11,6 +11,25 @@ if (!getApps().length) {
 
 const storage = getStorage();
 
+export const uploadImageToStorage = async (userId, imageUri) => {
+  try {
+    // Create a reference to the storage location
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+    const storageRef = ref(storage, `profilePictures/${userId}`);
+
+    // Upload the file
+    await uploadBytes(storageRef, blob);
+
+    // Get the download URL
+    const downloadURL = await getDownloadURL(storageRef);
+    return downloadURL;
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    throw error;
+  }
+};
+
 export const uploadImage = async (uri) => {
   if (!uri) return null;
 

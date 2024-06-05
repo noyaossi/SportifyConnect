@@ -56,7 +56,7 @@ function App() {
     <AuthProvider>
       <NavigationContainer>
         {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}
-        <BottomNavigationBar />
+        {/* <BottomNavigationBar />  */}
       </NavigationContainer>
     </AuthProvider>
   );

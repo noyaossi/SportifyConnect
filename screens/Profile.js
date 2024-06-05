@@ -23,7 +23,6 @@ const Profile = ({ navigation }) => {
           const details = await getUser(user.uid);
           setUserDetails(details);
           setUpdatedDetails(details); // Initialize updatedDetails with user details
-
         } else {
           navigation.navigate('Login');
         }
@@ -72,7 +71,6 @@ const Profile = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <BottomNavigationBar navigation={navigation} />
       {userDetails ? (
         <View style={styles.profileContainer}>
           <Image
@@ -113,14 +111,6 @@ const Profile = ({ navigation }) => {
                   onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, mobilenumber: text })}
                 />
               </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Profile Picture URL:</Text>
-                <TextInput
-                  style={styles.input}
-                  value={updatedDetails.profilepicture}
-                  onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, profilepicture: text })}
-                />
-              </View>
               <Button title="Save" onPress={handleSave} />
               <Button title="Cancel" onPress={() => setIsEditing(false)} />
             </>
@@ -154,6 +144,7 @@ const Profile = ({ navigation }) => {
       ) : (
         <Text style={styles.errorText}>No user details found.</Text>
       )}
+      <BottomNavigationBar navigation={navigation} />
     </View>
   );
 };

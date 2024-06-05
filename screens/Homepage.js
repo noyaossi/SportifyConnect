@@ -4,8 +4,14 @@ import React, { useEffect, useState } from 'react';
 import { View, FlatList, Text, StyleSheet, Button, RefreshControl, Image  } from 'react-native';
 import { getEvents, registerForEvent } from '../firebase/firestore'; // Import function to fetch events and register for events from Firestore
 import { useAuth } from '../contexts/AuthContext'; // Import AuthContext to get current user
+import BottomNavigationBar from '../components/BottomNavigationBar';
+import { NavigationContainer } from '@react-navigation/native';
+
+
 
 const Homepage = ({ navigation }) => {
+
+  <BottomNavigationBar navigation={navigation} />
   const [events, setEvents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const { currentUser } = useAuth(); // Get the current user from AuthContext
@@ -63,22 +69,31 @@ const Homepage = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={events}
-        renderItem={renderEventItem}
-        keyExtractor={(item) => item.id} // Assuming each event has a unique identifier
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      />
+    <View style={styles.maincontainer}>
+      <View style={styles.container}>
+        <FlatList
+          data={events}
+          renderItem={renderEventItem}
+          keyExtractor={(item) => item.id} // Assuming each event has a unique identifier
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        />
+      </View>
+      <BottomNavigationBar navigation={navigation} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  maincontainer: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
   container: {
     flex: 1,
     backgroundColor: 'white',
     padding: 20,
+    paddingBottom: 100, // Increased padding from 20 to 100
+
   },
   eventItem: {
     marginBottom: 10,

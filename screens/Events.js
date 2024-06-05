@@ -5,6 +5,8 @@ import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image } fro
 import { getEvents, getRegisteredEvents } from '../firebase/firestore'; // Import function to fetch events and registered events from Firestore
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth to get the current user
 import { Ionicons } from '@expo/vector-icons'; // Assuming you have installed expo vector icons
+import BottomNavigationBar from '../components/BottomNavigationBar';
+
 
 const Events = ({ navigation }) => {
   const [events, setEvents] = useState([]);
@@ -55,37 +57,43 @@ const Events = ({ navigation }) => {
   );
 
   return (
+    <View style={styles.maincontainer}>
 
-    <View style={styles.container}>
-      <Text style={styles.header}>All Events:</Text>
+      <View style={styles.container}>
+        <Text style={styles.header}>All Events:</Text>
+        <FlatList
+          data={events}
+          renderItem={renderEventItem}
+          keyExtractor={(item) => item.id} // Assuming each event has a unique identifier
+        />
+        <Text style={styles.header}>Registered Events:</Text>
+    {registeredEvents.length === 0 ? (
+      <Text>You are not currently registered for any events.</Text>
+    ) : (
       <FlatList
-        data={events}
+        data={registeredEvents}
         renderItem={renderEventItem}
-        keyExtractor={(item) => item.id} // Assuming each event has a unique identifier
+        keyExtractor={(item) => item.id}
       />
-      <Text style={styles.header}>Registered Events:</Text>
-  {registeredEvents.length === 0 ? (
-    <Text>You are not currently registered for any events.</Text>
-  ) : (
-    <FlatList
-      data={registeredEvents}
-      renderItem={renderEventItem}
-      keyExtractor={(item) => item.id}
-    />
-  )}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate('CreateEvent')}
-      >
-        <Ionicons name="add" size={30} color="white" />
-      </TouchableOpacity>
+    )}
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => navigation.navigate('CreateEvent')}
+        >
+          <Ionicons name="add" size={30} color="white" />
+        </TouchableOpacity>
+      </View>
+        <BottomNavigationBar navigation={navigation} />
     </View>
 
   );
 };
 
 const styles = StyleSheet.create({
-  
+  maincontainer:{
+      flex: 1,
+      backgroundColor: 'white',
+  },
   container: {
     flex: 1,
     backgroundColor: 'white',
