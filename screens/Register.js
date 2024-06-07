@@ -1,9 +1,11 @@
 // screens/Register.js
 
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
+import React, { useState, useEffect  } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Image   } from 'react-native';
 import { registerUser } from '../firebase/auth'; // Import registerUser from firebase/auth
-import { addUser } from '../firebase/firestore'; // Import addUser from firebase/firestore
+import { addUser, updateUser  } from '../firebase/firestore'; // Import addUser from firebase/firestore
+import * as ImagePicker from 'expo-image-picker';
+import { uploadImageToStorage } from '../firebase/storage'; // Import the uploadImageToStorage function
 
 
 const Register = ({ navigation }) => {
@@ -15,26 +17,58 @@ const Register = ({ navigation }) => {
   const [profilepicture, setProfilePicture] = useState('');
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    (async () => {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Sorry, we need camera roll permissions to make this work!');
+      }
+    })();
+  }, []);
+
 
   const handleRegister = async () => {
     try {
+      console.log('Starting registration process...');
       const userCredential = await registerUser(email, password);
       const user = userCredential.user;
+      let profilePictureUrl = '';
+
+      if (profilepicture) {
+        console.log('Uploading profile picture...');
+        profilePictureUrl = await uploadImageToStorage(profilepicture);
+        console.log('Profile picture URL:', profilePictureUrl);
+      }
+
       const userDetails = {
         firstname,
         lastname,
         email,
         mobilenumber,
-        profilepicture
+        profilepicture: profilePictureUrl,
       };
-      await addUser(user.uid, userDetails);
 
+      console.log('User details to save:', userDetails);
+      await addUser(user.uid, userDetails);
       Alert.alert('Registration Successful', `Welcome ${user.email}`);
-      // לאחר הרישום, נווט לעמוד ה-Login
       navigation.navigate('Login');
     } catch (error) {
       const errorMessage = error.message;
+      console.error('Error during registration:', error);
       Alert.alert('Registration Failed', errorMessage);
+    }
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    if (!result.canceled) {
+      console.log('Image picked:', result.assets[0].uri);
+      setProfilePicture(result.assets[0].uri);
     }
   };
 
@@ -46,7 +80,6 @@ const Register = ({ navigation }) => {
         placeholder="First Name"
         value={firstname}
         onChangeText={setFirstName}
-        keyboardType="first-name"
         autoCapitalize="none"
       />
       <TextInput
@@ -54,7 +87,6 @@ const Register = ({ navigation }) => {
         placeholder="Last Name"
         value={lastname}
         onChangeText={setLastName}
-        keyboardType="last-name"
         autoCapitalize="none"
       /><TextInput
       style={styles.input}
@@ -68,7 +100,7 @@ const Register = ({ navigation }) => {
     placeholder="Mobile Number"
     value={mobilenumber}
     onChangeText={setMobileNumber}
-    keyboardType="mobile-number"
+    keyboardType="phone-pad"
     autoCapitalize="none"
   />
       <TextInput
@@ -79,14 +111,12 @@ const Register = ({ navigation }) => {
         secureTextEntry
         autoCapitalize="none"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Profile Picture"
-        value={profilepicture}
-        onChangeText={setProfilePicture}
-        keyboardType="profile-picture"
-        autoCapitalize="none"
-      />
+      <TouchableOpacity onPress={pickImage}>
+        <Text>Choose Profile Picture</Text>
+      </TouchableOpacity>
+      {profilepicture ? (
+        <Image source={{ uri: profilepicture }} style={styles.profileImage} />
+      ) : null}
       <Button title="Register" onPress={handleRegister} />
       <Button
         title="Already have an account? Login"
@@ -113,6 +143,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 12,
     paddingHorizontal: 8,
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginTop: 10,
+    marginBottom: 10,
   },
 });
 

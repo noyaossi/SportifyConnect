@@ -1,7 +1,7 @@
 // screens/Events.js
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image, RefreshControl, ScrollView   } from 'react-native';
 import { getEvents, getRegisteredEvents } from '../firebase/firestore'; // Import function to fetch events and registered events from Firestore
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth to get the current user
 import { Ionicons } from '@expo/vector-icons'; // Assuming you have installed expo vector icons
@@ -11,7 +11,24 @@ import BottomNavigationBar from '../components/BottomNavigationBar';
 const Events = ({ navigation }) => {
   const [events, setEvents] = useState([]);
   const [registeredEvents, setRegisteredEvents] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   const { currentUser } = useAuth(); // Get the current user from AuthContext
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const eventsData = await getEvents(); // Fetch events data from Firestore
+      setEvents(eventsData); // Update state with fetched events
+      if (currentUser && currentUser.uid) {
+        const registeredEventsData = await getRegisteredEvents(currentUser.uid);
+        setRegisteredEvents(registeredEventsData);
+      }
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     // Fetch all events when the component mounts
@@ -58,34 +75,39 @@ const Events = ({ navigation }) => {
 
   return (
     <View style={styles.maincontainer}>
-
-      <View style={styles.container}>
-        <Text style={styles.header}>All Events:</Text>
-        <FlatList
-          data={events}
-          renderItem={renderEventItem}
-          keyExtractor={(item) => item.id} // Assuming each event has a unique identifier
-        />
-        <Text style={styles.header}>Registered Events:</Text>
-    {registeredEvents.length === 0 ? (
-      <Text>You are not currently registered for any events.</Text>
-    ) : (
-      <FlatList
-        data={registeredEvents}
-        renderItem={renderEventItem}
-        keyExtractor={(item) => item.id}
-      />
-    )}
-        <TouchableOpacity
-          style={styles.fab}
-          onPress={() => navigation.navigate('CreateEvent')}
-        >
-          <Ionicons name="add" size={30} color="white" />
-        </TouchableOpacity>
-      </View>
-        <BottomNavigationBar navigation={navigation} />
+      <ScrollView
+        contentContainerStyle={styles.scrollViewContent}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <View style={styles.container}>
+          <Text style={styles.header}>All Events:</Text>
+          <FlatList
+            data={events}
+            renderItem={renderEventItem}
+            keyExtractor={(item) => item.id} // Assuming each event has a unique identifier
+            scrollEnabled={false} // Disable scrolling for individual FlatList
+          />
+          <Text style={styles.header}>Registered Events:</Text>
+          {registeredEvents.length === 0 ? (
+            <Text>You are not currently registered for any events.</Text>
+          ) : (
+            <FlatList
+              data={registeredEvents}
+              renderItem={renderEventItem}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false} // Disable scrolling for individual FlatList
+            />
+          )}
+        </View>
+      </ScrollView>
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => navigation.navigate('CreateEvent')}
+      >
+        <Ionicons name="add" size={30} color="white" />
+      </TouchableOpacity>
+      <BottomNavigationBar navigation={navigation} />
     </View>
-
   );
 };
 
@@ -93,6 +115,9 @@ const styles = StyleSheet.create({
   maincontainer:{
       flex: 1,
       backgroundColor: 'white',
+  },
+  scrollViewContent: {
+    paddingBottom: 100, // Increased padding from 20 to 100
   },
   container: {
     flex: 1,

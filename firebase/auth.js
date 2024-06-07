@@ -12,6 +12,9 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import firebaseConfig from './firebaseConfig'; // Import your firebaseConfig
 
+
+
+
 // Initialize Firebase only if it hasn't been initialized yet
 let app;
 if (!getApps().length) {
@@ -25,8 +28,13 @@ const auth = initializeAuth(app, {
 });
 
 // Function to register a new user
-export const registerUser = (email, password) => {
-  return createUserWithEmailAndPassword(auth, email, password);
+export const registerUser = async (email, password) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    return userCredential;
+  } catch (error) {
+    throw error;
+  }
 };
 
 // Function to login a user

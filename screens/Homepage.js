@@ -46,6 +46,7 @@ const Homepage = ({ navigation }) => {
     try {
       await registerForEvent(currentUser.uid, eventId); // Register user for the event
       alert('Registered successfully!');
+      onRefresh(); // Refresh the list of events
     } catch (error) {
       console.error('Error registering for event:', error);
       alert('Error registering for event.');
@@ -63,7 +64,7 @@ const Homepage = ({ navigation }) => {
       <Button
         title="Register"
         onPress={() => handleRegister(item.id)}
-        color="#ADD8E6" // Light blue color
+        color="green"
       />
     </View>
   );

@@ -1,7 +1,7 @@
 // screens/Profile.js
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, ActivityIndicator, StyleSheet, Image, TouchableOpacity   } from 'react-native';
+import { View, Text, TextInput, Button, ActivityIndicator, StyleSheet, Image   } from 'react-native';
 import { logoutUser, checkLoginStatus  } from '../firebase/auth';
 import { getUser, updateUser  } from '../firebase/firestore';
 import BottomNavigationBar from '../components/BottomNavigationBar';
@@ -131,10 +131,6 @@ const Profile = ({ navigation }) => {
               <View style={styles.detailRow}>
                 <Text style={styles.label}>Mobile Number:</Text>
                 <Text style={styles.value}>{userDetails.mobilenumber}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Profile Picture URL:</Text>
-                <Text style={styles.value}>{userDetails.profilepicture}</Text>
               </View>
               <Button title="Edit Profile" onPress={() => setIsEditing(true)} />
             </>

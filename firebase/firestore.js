@@ -108,14 +108,15 @@ export const getRegisteredEvents = async (userId) => {
 
 
     if (registeredEventIds.length > 0) {
-      const eventsCollection = collection(firestore, 'events');
-      const q = query(eventsCollection, where('_name_', 'in', registeredEventIds));
-      const eventsSnapshot = await getDocs(q);
-      const eventsData = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      return eventsData;
+      const eventsPromises = registeredEventIds.map(async (eventId) => {
+        const eventDoc = await getDoc(doc(firestore, 'events', eventId));
+        return { id: eventDoc.id, ...eventDoc.data() };
+      });
+
+      const registeredEvents = await Promise.all(eventsPromises);
+      return registeredEvents;
     } else {
-      // Handle the case where registeredEventIds is empty
-      // Option 1: Return an empty array
+      // Return an empty array if no registered events
       return [];
     }
   } catch (error) {

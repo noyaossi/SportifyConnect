@@ -30,6 +30,7 @@ const Login = ({ navigation }) => {
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
+        keyboardType="email-address"
         style={{ borderWidth: 1, width: 200, marginVertical: 10, padding: 5 }}
       />
       <TextInput
