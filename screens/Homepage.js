@@ -48,8 +48,12 @@ const Homepage = ({ navigation }) => {
       alert('Registered successfully!');
       onRefresh(); // Refresh the list of events
     } catch (error) {
-      console.error('Error registering for event:', error);
-      alert('Error registering for event.');
+      if (error.message === 'User already registered for this event') {
+        alert('You are already registered for this event.');
+      } else {
+        console.error('Error registering for event:', error);
+        alert('Error registering for event.');
+      }
     }
   };
 

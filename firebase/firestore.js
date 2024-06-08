@@ -85,11 +85,38 @@ export const registerForEvent = async (userId, eventId) => {
     
     const userData = userSnap.data();
     const registeredEvents = userData.registeredEvents || [];
-    registeredEvents.push(eventId);
-
-    await updateDoc(userRef, { registeredEvents });
+    if (!registeredEvents.includes(eventId)) {
+      registeredEvents.push(eventId);
+      await updateDoc(userRef, { registeredEvents });
+    } else {
+      throw new Error('User already registered for this event');
+    }
   } catch (error) {
     console.error('Error registering for event:', error);
+    throw error;
+  }
+};
+
+// Function to unregister from an event
+export const unregisterForEvent = async (userId, eventId) => {
+  try {
+    const userRef = doc(firestore, 'users', userId);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) {
+      throw new Error('User does not exist');
+    }
+    
+    const userData = userSnap.data();
+    const registeredEvents = userData.registeredEvents || [];
+    
+    if (registeredEvents.includes(eventId)) {
+      const updatedEvents = registeredEvents.filter(id => id !== eventId);
+      await updateDoc(userRef, { registeredEvents: updatedEvents });
+    } else {
+      throw new Error('User not registered for this event');
+    }
+  } catch (error) {
+    console.error('Error unregistering for event:', error);
     throw error;
   }
 };

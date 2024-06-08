@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image, RefreshControl, ScrollView   } from 'react-native';
-import { getEvents, getRegisteredEvents } from '../firebase/firestore'; // Import function to fetch events and registered events from Firestore
+import { getEvents, getRegisteredEvents, unregisterForEvent  } from '../firebase/firestore'; // Import function to fetch events and registered events from Firestore
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth to get the current user
 import { Ionicons } from '@expo/vector-icons'; // Assuming you have installed expo vector icons
 import BottomNavigationBar from '../components/BottomNavigationBar';
@@ -62,6 +62,17 @@ const Events = ({ navigation }) => {
     fetchRegisteredEvents(); // Call fetchRegisteredEvents function
   }, [currentUser]);
 
+  const handleUnregister = async (eventId) => {
+    try {
+      await unregisterForEvent(currentUser.uid, eventId);
+      alert('Unregistered successfully!');
+      onRefresh(); // Refresh the list of events
+    } catch (error) {
+      console.error('Error unregistering from event:', error);
+      alert('Error unregistering from event.');
+    }
+  };
+
   // Render each event item in a FlatList
   const renderEventItem = ({ item }) => (
     <View style={styles.eventItem}>
@@ -72,6 +83,22 @@ const Events = ({ navigation }) => {
       {item.picture && <Image source={{ uri: item.picture }} style={styles.eventImage} />}
     </View>
   );
+
+  const renderRegisteredEventItem = ({ item }) => (
+    <View style={styles.eventItem}>
+      <View style={styles.eventDetailsContainer}>
+        <Text style={styles.eventName}>{item.eventName}</Text>
+        <Text style={styles.eventDetails}>{item.location}, {item.date}, {item.time}</Text>
+      </View>
+      {item.picture && <Image source={{ uri: item.picture }} style={styles.eventImage} />}
+      <Button
+        title="Unregister"
+        onPress={() => handleUnregister(item.id)}
+        color="red"
+      />
+    </View>
+  );
+
 
   return (
     <View style={styles.maincontainer}>
@@ -93,7 +120,7 @@ const Events = ({ navigation }) => {
           ) : (
             <FlatList
               data={registeredEvents}
-              renderItem={renderEventItem}
+              renderItem={renderRegisteredEventItem}
               keyExtractor={(item) => item.id}
               scrollEnabled={false} // Disable scrolling for individual FlatList
             />
