@@ -4,8 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Image, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
-import { addEvent } from '../firebase/firestore';
+import { addEvent, createNewEvent } from '../firebase/firestore';
 import { uploadImage } from '../firebase/storage';
+import { useAuth } from '../contexts/AuthContext'; // Import AuthContext to get current user
+
 
 const CreateEvent = ({ navigation }) => {
   const [eventName, setEventName] = useState('');
@@ -15,6 +17,8 @@ const CreateEvent = ({ navigation }) => {
   const [participants, setParticipants] = useState('');
   const [description, setDescription] = useState('');
   const [picture, setPicture] = useState(null);
+  const { currentUser } = useAuth(); // Get the current user from AuthContext
+
 
   const getGalleryPermission = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -79,6 +83,8 @@ const CreateEvent = ({ navigation }) => {
       console.log('New event object:', newEvent);
 
       const eventId = await addEvent(newEvent);
+      await createNewEvent(currentUser.uid, eventId); // create new event 
+
       console.log('Event created with ID:', eventId);
       navigation.navigate('Events');
     } catch (error) {

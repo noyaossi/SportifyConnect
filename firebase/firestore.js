@@ -11,7 +11,6 @@ if (!getApps().length) {
 } else {
   app = getApps()[0];
 }
-
 const firestore = getFirestore(app);
 
 // Function to add a new event
@@ -42,7 +41,8 @@ export const getUser = async (uid) => {
     const docRef = doc(firestore, 'users', uid);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      return docSnap.data();
+      const userData = docSnap.data();
+      return userData;
     } else {
       throw new Error('No such user!');
     }
@@ -52,9 +52,10 @@ export const getUser = async (uid) => {
   }
 };
 
-export const updateUser = async (uid, userDetails) => {
+// Function to update a user
+export const updateUser = async (updatedUser) => {
   try {
-    await updateDoc(doc(firestore, 'users', uid), userDetails);
+    await updateDoc(doc(firestore, 'users',  updatedUser.uid), updatedUser);
   } catch (error) {
     console.error('Error updating user:', error);
     throw error;
@@ -70,6 +71,31 @@ export const getEvents = async () => {
     return eventsData;
   } catch (error) {
     console.error('Error fetching events:', error);
+    throw error;
+  }
+};
+
+// Function to fetch a single event by ID
+export const getEvent = async (eventId) => {
+  try {
+    const eventDoc = await getDoc(doc(firestore, 'events', eventId));
+    if (eventDoc.exists()) {
+      return { id: eventDoc.id, ...eventDoc.data() };
+    } else {
+      throw new Error('Event not found');
+    }
+  } catch (error) {
+    console.error('Error fetching event:', error);
+    throw error;
+  }
+};
+
+// Function to update an event
+export const updateEvent = async (eventId, eventDetails) => {
+  try {
+    await updateDoc(doc(firestore, 'events', eventId), eventDetails);
+  } catch (error) {
+    console.error('Error updating event:', error);
     throw error;
   }
 };
@@ -93,6 +119,29 @@ export const registerForEvent = async (userId, eventId) => {
     }
   } catch (error) {
     console.error('Error registering for event:', error);
+    throw error;
+  }
+};
+
+// Function to register for an event
+export const createNewEvent = async (userId, eventId) => {
+  try {
+    const userRef = doc(firestore, 'users', userId);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) {
+      throw new Error('User does not exist');
+    }
+    
+    const userData = userSnap.data();
+    const createdEvents = userData.createdEvents || [];
+    if (!createdEvents.includes(eventId)) {
+      createdEvents.push(eventId);
+      await updateDoc(userRef, { createdEvents });
+    } else {
+      throw new Error('Can not create new event');
+    }
+  } catch (error) {
+    console.error('Error for create event:', error);
     throw error;
   }
 };
@@ -129,17 +178,13 @@ export const getRegisteredEvents = async (userId) => {
     if (!userSnap.exists()) {
       throw new Error('User does not exist');
     }
-
     const userData = userSnap.data();
     const registeredEventIds = userData.registeredEvents || [];
-
-
     if (registeredEventIds.length > 0) {
       const eventsPromises = registeredEventIds.map(async (eventId) => {
         const eventDoc = await getDoc(doc(firestore, 'events', eventId));
         return { id: eventDoc.id, ...eventDoc.data() };
       });
-
       const registeredEvents = await Promise.all(eventsPromises);
       return registeredEvents;
     } else {
@@ -148,6 +193,33 @@ export const getRegisteredEvents = async (userId) => {
     }
   } catch (error) {
     console.error('Error fetching registered events:', error);
+    throw error;
+  }
+};
+
+// Function to get created events by user
+export const getCreatedEvents = async (userId) => {
+  try {
+    const userRef = doc(firestore, 'users', userId);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) {
+      throw new Error('User does not exist');
+    }
+    const userData = userSnap.data();
+    const createdEventsIds = userData.createdEvents || [];
+    if (createdEventsIds.length > 0) {
+      const eventsPromises = createdEventsIds.map(async (eventId) => {
+        const eventDoc = await getDoc(doc(firestore, 'events', eventId));
+        return { id: eventDoc.id, ...eventDoc.data() };
+      });
+      const createdEvents = await Promise.all(eventsPromises);
+      return createdEvents;
+    } else {
+      // Return an empty array if no created new events
+      return [];
+    }
+  } catch (error) {
+    console.error('Error fetching created events:', error);
     throw error;
   }
 };

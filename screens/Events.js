@@ -1,8 +1,8 @@
 // screens/Events.js
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image, RefreshControl, ScrollView   } from 'react-native';
-import { getEvents, getRegisteredEvents, unregisterForEvent  } from '../firebase/firestore'; // Import function to fetch events and registered events from Firestore
+import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image, RefreshControl, ScrollView} from 'react-native';
+import { getEvents, getRegisteredEvents, unregisterForEvent, getCreatedEvents  } from '../firebase/firestore'; // Import function to fetch events and registered events from Firestore
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth to get the current user
 import { Ionicons } from '@expo/vector-icons'; // Assuming you have installed expo vector icons
 import BottomNavigationBar from '../components/BottomNavigationBar';
@@ -11,6 +11,7 @@ import BottomNavigationBar from '../components/BottomNavigationBar';
 const Events = ({ navigation }) => {
   const [events, setEvents] = useState([]);
   const [registeredEvents, setRegisteredEvents] = useState([]);
+  const [createdEvents, setCreatedEvents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const { currentUser } = useAuth(); // Get the current user from AuthContext
 
@@ -22,6 +23,8 @@ const Events = ({ navigation }) => {
       if (currentUser && currentUser.uid) {
         const registeredEventsData = await getRegisteredEvents(currentUser.uid);
         setRegisteredEvents(registeredEventsData);
+        const createdEventsData = await getCreatedEvents(currentUser.uid);
+        setCreatedEvents(createdEventsData);
       }
     } catch (error) {
       console.error('Error fetching events:', error);
@@ -46,7 +49,7 @@ const Events = ({ navigation }) => {
 
   useEffect(() => {
     // Fetch registered events when the current user changes
-    const fetchRegisteredEvents = async () => {
+    const fetchRegisteredAndCreatedEvents  = async () => {
       if (!currentUser || !currentUser.uid) return; // Exit if no currentUser or UID
     
       try {
@@ -54,12 +57,16 @@ const Events = ({ navigation }) => {
         if (registeredEventsData.length !== 0) { // Check if data is not empty
           setRegisteredEvents(registeredEventsData);
         }
+        const createdEventsData = await getCreatedEvents(currentUser.uid);
+        if (createdEventsData.length !== 0) {
+          setCreatedEvents(createdEventsData);
+        }
       } catch (error) {
-        console.error('Error fetching registered events:', error);
+        console.error('Error fetching registered or created events:', error);
       }
     };
 
-    fetchRegisteredEvents(); // Call fetchRegisteredEvents function
+    fetchRegisteredAndCreatedEvents(); // Call fetchRegisteredEvents function
   }, [currentUser]);
 
   const handleUnregister = async (eventId) => {
@@ -98,6 +105,20 @@ const Events = ({ navigation }) => {
       />
     </View>
   );
+  const renderCreatedEventItem = ({ item }) => (
+    <View style={styles.eventItem}>
+      <View style={styles.eventDetailsContainer}>
+        <Text style={styles.eventName}>{item.eventName}</Text>
+        <Text style={styles.eventDetails}>{item.location}, {item.date}, {item.time}</Text>
+      </View>
+      {item.picture && <Image source={{ uri: item.picture }} style={styles.eventImage} />}
+      <Button
+        title="Edit"
+        onPress={() => navigation.navigate('EditEvent', { eventId: item.id })}
+        color="blue"
+      />
+    </View>
+  );
 
 
   return (
@@ -107,13 +128,6 @@ const Events = ({ navigation }) => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <View style={styles.container}>
-          <Text style={styles.header}>All Events:</Text>
-          <FlatList
-            data={events}
-            renderItem={renderEventItem}
-            keyExtractor={(item) => item.id} // Assuming each event has a unique identifier
-            scrollEnabled={false} // Disable scrolling for individual FlatList
-          />
           <Text style={styles.header}>Registered Events:</Text>
           {registeredEvents.length === 0 ? (
             <Text>You are not currently registered for any events.</Text>
@@ -122,7 +136,18 @@ const Events = ({ navigation }) => {
               data={registeredEvents}
               renderItem={renderRegisteredEventItem}
               keyExtractor={(item) => item.id}
-              scrollEnabled={false} // Disable scrolling for individual FlatList
+              scrollEnabled={false}
+            />
+          )}
+          <Text style={styles.header}>Created Events:</Text>
+          {createdEvents.length === 0 ? (
+            <Text>You have not created any events.</Text>
+          ) : (
+            <FlatList
+              data={createdEvents}
+              renderItem={renderCreatedEventItem}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
             />
           )}
         </View>

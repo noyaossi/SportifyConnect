@@ -75,6 +75,7 @@ const Homepage = ({ navigation }) => {
 
   return (
     <View style={styles.maincontainer}>
+            <Text style={styles.header}>Explore Events</Text>
       <View style={styles.container}>
         <FlatList
           data={events}
@@ -98,7 +99,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 20,
     paddingBottom: 100, // Increased padding from 20 to 100
-
+  },
+  header: {
+    fontSize: 24,
+    marginVertical: 10,
+    textAlign: 'center',
   },
   eventItem: {
     marginBottom: 10,
