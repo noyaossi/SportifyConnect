@@ -1,9 +1,11 @@
 // screens/Profile.js
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, ActivityIndicator, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, ActivityIndicator, StyleSheet, Image, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import { logoutUser, checkLoginStatus  } from '../firebase/auth';
 import { getUser, updateUser  } from '../firebase/firestore';
 import BottomNavigationBar from '../components/BottomNavigationBar';
+import * as ImagePicker from 'expo-image-picker'; // Import ImagePicker
+import { uploadImageToStorage } from '../firebase/storage'; // Import uploadImageToStorage function
 
 
 const Profile = ({ navigation }) => {
@@ -13,16 +15,23 @@ const Profile = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [updatedDetails, setUpdatedDetails] = useState({});
-
+  const [newProfilePicture, setNewProfilePicture] = useState(null); // New state for storing the selected picture
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
+    fetchUserDetails();
+  }, []);
+
     const fetchUserDetails = async () => {
+      setIsRefreshing(true);
+
       try {
         const user = await checkLoginStatus();
         if (user) {
           const details = await getUser(user.uid);
           setUserDetails(details);
-          setUpdatedDetails({ ...details, uid: user.uid }); // Ensure uid is included
+          setUpdatedDetails(details); // Initialize updatedDetails with current user details
+
         } else {
           navigation.navigate('Login');
         }
@@ -30,11 +39,26 @@ const Profile = ({ navigation }) => {
         console.error('Error fetching user details:', error);
       } finally {
         setIsLoading(false);
+        setIsRefreshing(false);
+
       }
     };
 
-    fetchUserDetails();
-  }, [navigation]);
+
+
+// Function to handle the selection of a new profile picture
+const pickNewProfilePicture = async () => {
+  let result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [4, 3],
+    quality: 1,
+  });
+  if (!result.canceled) {
+    console.log('New profile picture picked:', result.assets[0].uri);
+    setNewProfilePicture(result.assets[0].uri);
+  }
+};
 
   const handleLogout = async () => {
     try {
@@ -47,19 +71,38 @@ const Profile = ({ navigation }) => {
       console.error('Error logging out:', error);
     }
   };
-
-  const handleSave = async () => {
-    try {
-      const user = await checkLoginStatus();
-      if (user) {
-        await updateUser(user.uid, updatedDetails);
-        setUserDetails(updatedDetails);
-        setIsEditing(false);
+// Function to handle saving changes
+const handleSave = async () => {
+  try {
+    const user = await checkLoginStatus();
+    if (user) {
+      const updatedUserDetails = { ...userDetails }; // Clone the userDetails object
+      if (newProfilePicture) {
+        console.log('Uploading new profile picture...');
+        const profilePictureUrl = await uploadImageToStorage(newProfilePicture);
+        updatedUserDetails.profilepicture = profilePictureUrl; // Update the profile picture URL
+        setNewProfilePicture(null); // Clear the selected picture
       }
-    } catch (error) {
-      console.error('Error updating user details:', error);
+
+      // Update other details if they have changed
+      Object.keys(updatedDetails).forEach(key => {
+        if (updatedDetails[key] !== userDetails[key]) {
+          updatedUserDetails[key] = updatedDetails[key];
+        }
+      });
+
+      await updateUser(user.uid, updatedUserDetails);
+      setUserDetails(updatedUserDetails);
+      setIsEditing(false);
+      console.log('Profile updated successfully!');
     }
-  };
+  } catch (error) {
+    console.error('Error updating profile:', error);
+  }
+};
+const handleRefresh = () => {
+  fetchUserDetails();
+};
 
   if (isLoading) {
     return (
@@ -69,13 +112,15 @@ const Profile = ({ navigation }) => {
     );
   }
 
-  
-
   return (
     <View style={styles.container}>
+    <ScrollView
+        contentContainerStyle={styles.scrollViewContent}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
+      >
       {userDetails ? (
         <View style={styles.profileContainer}>
-           <Image
+          <Image
             source={{ uri: userDetails.profilepicture || 'https://via.placeholder.com/150' }}
             style={styles.profileImage}
           />
@@ -113,9 +158,14 @@ const Profile = ({ navigation }) => {
                   onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, mobilenumber: text })}
                 />
               </View>
+              <TouchableOpacity style={styles.button} onPress={pickNewProfilePicture}>
+                <Text style={styles.buttonText}>Change Profile Picture</Text>
+              </TouchableOpacity>
               <Button title="Save" onPress={handleSave} />
               <Button title="Cancel" onPress={() => setIsEditing(false)} />
             </>
+                 
+
           ) : (
             <>
               <View style={styles.detailRow}>
@@ -142,8 +192,11 @@ const Profile = ({ navigation }) => {
       ) : (
         <Text style={styles.errorText}>No user details found.</Text>
       )}
+          </ScrollView>
+
       <BottomNavigationBar navigation={navigation} />
-    </View>
+      </View>
+
   );
 };
 
@@ -152,13 +205,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0f0f0',
   },
-  loaderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   profileContainer: {
-    flex: 1,
     alignItems: 'center',
     paddingTop: 20,
   },
@@ -190,6 +237,16 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     flex: 1,
   },
+  button: {
+    backgroundColor: 'blue',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+  },
   logoutButton: {
     marginTop: 20,
   },
@@ -197,6 +254,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'red',
     textAlign: 'center',
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
   },
 });
 
