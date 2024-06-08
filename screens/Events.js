@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image, RefreshControl, ScrollView} from 'react-native';
-import { getEvents, getRegisteredEvents, unregisterForEvent, getCreatedEvents  } from '../firebase/firestore'; // Import function to fetch events and registered events from Firestore
+import { getEvents, getRegisteredEvents, unregisterForEvent, getCreatedEvents, handleDeleteEvent  } from '../firebase/firestore'; // Import function to fetch events and registered events from Firestore
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth to get the current user
 import { Ionicons } from '@expo/vector-icons'; // Assuming you have installed expo vector icons
 import BottomNavigationBar from '../components/BottomNavigationBar';
@@ -112,11 +112,13 @@ const Events = ({ navigation }) => {
         <Text style={styles.eventDetails}>{item.location}, {item.date}, {item.time}</Text>
       </View>
       {item.picture && <Image source={{ uri: item.picture }} style={styles.eventImage} />}
+      <View style={styles.buttonContainer}>
       <Button
         title="Edit"
         onPress={() => navigation.navigate('EditEvent', { eventId: item.id })}
         color="blue"
       />
+    </View>
     </View>
   );
 

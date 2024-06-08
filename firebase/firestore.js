@@ -1,7 +1,7 @@
 // firebase/firestore.js
 
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, getDocs, query, where } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, getDocs, query, where, deleteDoc } from 'firebase/firestore';
 import firebaseConfig from './firebaseConfig';
 
 // Initialize Firebase only if it hasn't been initialized yet
@@ -78,8 +78,10 @@ export const getEvents = async () => {
 // Function to fetch a single event by ID
 export const getEvent = async (eventId) => {
   try {
+    console.log(`Fetching event with ID: ${eventId}`);
     const eventDoc = await getDoc(doc(firestore, 'events', eventId));
     if (eventDoc.exists()) {
+      console.log(`Event found: ${JSON.stringify(eventDoc.data())}`);
       return { id: eventDoc.id, ...eventDoc.data() };
     } else {
       throw new Error('Event not found');
@@ -220,6 +222,33 @@ export const getCreatedEvents = async (userId) => {
     }
   } catch (error) {
     console.error('Error fetching created events:', error);
+    throw error;
+  }
+};
+
+// Add a new function to delete an event
+export const handleDeleteEvent = async (eventId, userId) => {
+  try {
+    await deleteDoc(doc(firestore, 'events', eventId));
+    console.log('Event deleted successfully!');
+     // Fetch the user document
+     const userRef = doc(firestore, 'users', userId);
+     const userSnap = await getDoc(userRef);
+ 
+     if (userSnap.exists()) {
+       const userData = userSnap.data();
+       const createdEvents = userData.createdEvents || [];
+ 
+       // Remove the deleted event from the createdEvents list
+       const updatedEvents = createdEvents.filter(id => id !== eventId);
+       await updateDoc(userRef, { createdEvents: updatedEvents });
+     } else {
+       throw new Error('User not found');
+     }
+
+
+  } catch (error) {
+    console.error('Error deleting event:', error);
     throw error;
   }
 };
