@@ -1,7 +1,6 @@
 // screens/Profile.js
-
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, ActivityIndicator, StyleSheet, Image   } from 'react-native';
+import { View, Text, TextInput, Button, ActivityIndicator, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { logoutUser, checkLoginStatus  } from '../firebase/auth';
 import { getUser, updateUser  } from '../firebase/firestore';
 import BottomNavigationBar from '../components/BottomNavigationBar';
@@ -15,6 +14,7 @@ const Profile = ({ navigation }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [updatedDetails, setUpdatedDetails] = useState({});
 
+
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -22,7 +22,7 @@ const Profile = ({ navigation }) => {
         if (user) {
           const details = await getUser(user.uid);
           setUserDetails(details);
-          setUpdatedDetails(details); // Initialize updatedDetails with user details
+          setUpdatedDetails({ ...details, uid: user.uid }); // Ensure uid is included
         } else {
           navigation.navigate('Login');
         }
@@ -69,11 +69,13 @@ const Profile = ({ navigation }) => {
     );
   }
 
+  
+
   return (
     <View style={styles.container}>
       {userDetails ? (
         <View style={styles.profileContainer}>
-          <Image
+           <Image
             source={{ uri: userDetails.profilepicture || 'https://via.placeholder.com/150' }}
             style={styles.profileImage}
           />

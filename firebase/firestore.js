@@ -53,9 +53,10 @@ export const getUser = async (uid) => {
 };
 
 // Function to update a user
-export const updateUser = async (updatedUser) => {
+export const updateUser = async (uid,updatedUser) => {
   try {
-    await updateDoc(doc(firestore, 'users',  updatedUser.uid), updatedUser);
+    const userRef = doc(firestore, 'users', uid);
+    await updateDoc(userRef, updatedUser);
   } catch (error) {
     console.error('Error updating user:', error);
     throw error;
