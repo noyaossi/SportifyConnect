@@ -8,7 +8,7 @@ import CreateEvent from '../screens/CreateEvent';
 import Profile from '../screens/Profile';
 import Login from '../screens/Login';
 import Register from '../screens/Register';
-import EditEvent from '../screens/EditEvent'; // Import EditEvent screen
+import EditEvent from '../screens/EditEvent';
 
 
 const Stack = createNativeStackNavigator();

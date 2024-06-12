@@ -49,7 +49,7 @@ const EditEvent = ({ route, navigation }) => {
   useEffect(() => {
     getGalleryPermission();
   }, []);
-
+ 
   const handleSave = async () => {
     try {
       await updateEvent(eventId, eventDetails);
@@ -73,11 +73,8 @@ const EditEvent = ({ route, navigation }) => {
       }
     } catch (error) {
       console.error('Error deleting event:', error);
-      alert('Error deleting event.');
     }
   };
-
-  
 
   // Add a new function to handle image picking
 const pickImage = async () => {

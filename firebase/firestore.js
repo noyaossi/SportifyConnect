@@ -107,17 +107,28 @@ export const updateEvent = async (eventId, eventDetails) => {
 export const registerForEvent = async (userId, eventId) => {
   try {
     const userRef = doc(firestore, 'users', userId);
-    const userSnap = await getDoc(userRef);
-    if (!userSnap.exists()) {
-      throw new Error('User does not exist');
-    }
+    const eventRef = doc(firestore, 'events', eventId);
+
+    const [userSnap, eventSnap] = await Promise.all([getDoc(userRef), getDoc(eventRef)]);
+
+    if (!userSnap.exists()) throw new Error('User does not exist');
+    if (!eventSnap.exists()) throw new Error('Event does not exist');
     
     const userData = userSnap.data();
+    const eventData = eventSnap.data();
+
     const registeredEvents = userData.registeredEvents || [];
+    const registeredUsers = eventData.registeredUsers || [];
+
     if (!registeredEvents.includes(eventId)) {
       registeredEvents.push(eventId);
       await updateDoc(userRef, { registeredEvents });
-    } else {
+    }
+    if (!registeredUsers.includes(userId)) {
+      registeredUsers.push(userId);
+      await updateDoc(eventRef, { registeredUsers });
+    }
+    else {
       throw new Error('User already registered for this event');
     }
   } catch (error) {
@@ -227,27 +238,46 @@ export const getCreatedEvents = async (userId) => {
   }
 };
 
-// Add a new function to delete an event
+// Function to delete an event and update registered users
 export const handleDeleteEvent = async (eventId, userId) => {
   try {
-    await deleteDoc(doc(firestore, 'events', eventId));
+    const eventRef = doc(firestore, 'events', eventId);
+    const eventSnap = await getDoc(eventRef);
+
+    if (!eventSnap.exists()) throw new Error('Event does not exist');
+    
+    const eventData = eventSnap.data();
+    const registeredUsers = eventData.registeredUsers || [];
+
+    // Delete the event document
+    await deleteDoc(eventRef);
     console.log('Event deleted successfully!');
-     // Fetch the user document
-     const userRef = doc(firestore, 'users', userId);
-     const userSnap = await getDoc(userRef);
- 
-     if (userSnap.exists()) {
-       const userData = userSnap.data();
-       const createdEvents = userData.createdEvents || [];
- 
-       // Remove the deleted event from the createdEvents list
-       const updatedEvents = createdEvents.filter(id => id !== eventId);
-       await updateDoc(userRef, { createdEvents: updatedEvents });
-     } else {
-       throw new Error('User not found');
-     }
 
+    // Update the created events list of the user who created the event
+    const userRef = doc(firestore, 'users', userId);
+    const userSnap = await getDoc(userRef);
+ 
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      const createdEvents = userData.createdEvents || [];
+      const updatedCreatedEvents = createdEvents.filter(id => id !== eventId);
+      await updateDoc(userRef, { createdEvents: updatedCreatedEvents });
+    } else {
+      throw new Error('User not found');
+    }
 
+    // Remove the event from the registered events list of each registered user
+    await Promise.all(registeredUsers.map(async (user) => {
+      const userRef = doc(firestore, 'users', user);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const userData = userSnap.data();
+        const registeredEvents = userData.registeredEvents || [];
+        const updatedRegisteredEvents = registeredEvents.filter(id => id !== eventId);
+        await updateDoc(userRef, { registeredEvents: updatedRegisteredEvents });
+      }
+    }));
+    
   } catch (error) {
     console.error('Error deleting event:', error);
     throw error;
