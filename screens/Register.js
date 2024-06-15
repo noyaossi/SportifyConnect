@@ -1,11 +1,13 @@
 // screens/Register.js
 
 import React, { useState, useEffect  } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Image   } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Image, ImageBackground    } from 'react-native';
 import { registerUser } from '../firebase/auth'; // Import registerUser from firebase/auth
 import { addUser, updateUser  } from '../firebase/firestore'; // Import addUser from firebase/firestore
 import * as ImagePicker from 'expo-image-picker';
 import { uploadImageToStorage } from '../firebase/storage'; // Import the uploadImageToStorage function
+import commonStyles from '../styles/styles'; // Import common styles
+
 
 
 const Register = ({ navigation }) => {
@@ -29,15 +31,14 @@ const Register = ({ navigation }) => {
 
   const handleRegister = async () => {
     try {
-      console.log('Starting registration process...');
       const userCredential = await registerUser(email, password);
       const user = userCredential.user;
       let profilePictureUrl = '';
 
       if (profilepicture) {
-        console.log('Uploading profile picture...');
+        //console.log('Uploading profile picture...');
         profilePictureUrl = await uploadImageToStorage(profilepicture);
-        console.log('Profile picture URL:', profilePictureUrl);
+        //console.log('Profile picture URL:', profilePictureUrl);
       }
 
       const userDetails = {
@@ -48,7 +49,7 @@ const Register = ({ navigation }) => {
         profilepicture: profilePictureUrl,
       };
 
-      console.log('User details to save:', userDetails);
+      //console.log('User details to save:', userDetails);
       await addUser(user.uid, userDetails);
       Alert.alert('Registration Successful', `Welcome ${user.email}`);
       navigation.navigate('Login');
@@ -73,30 +74,31 @@ const Register = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Register</Text>
+    <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.backgroundImage}>
+    <View style={commonStyles.container}>
+      <Text style={commonStyles.title}>Register</Text>
       <TextInput
-        style={styles.input}
+        style={commonStyles.input}
         placeholder="First Name"
         value={firstname}
         onChangeText={setFirstName}
         autoCapitalize="none"
       />
       <TextInput
-        style={styles.input}
+        style={commonStyles.input}
         placeholder="Last Name"
         value={lastname}
         onChangeText={setLastName}
         autoCapitalize="none"
       /><TextInput
-      style={styles.input}
+      style={commonStyles.input}
       placeholder="Email"
       value={email}
       onChangeText={setEmail}
       keyboardType="email-address"
       autoCapitalize="none"
     /><TextInput
-    style={styles.input}
+    style={commonStyles.input}
     placeholder="Mobile Number"
     value={mobilenumber}
     onChangeText={setMobileNumber}
@@ -104,53 +106,27 @@ const Register = ({ navigation }) => {
     autoCapitalize="none"
   />
       <TextInput
-        style={styles.input}
+        style={commonStyles.input}
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
         autoCapitalize="none"
       />
-      <TouchableOpacity onPress={pickImage}>
-        <Text>Choose Profile Picture</Text>
-      </TouchableOpacity>
+      <TouchableOpacity style={commonStyles.button} onPress={pickImage}>
+          <Text style={commonStyles.buttonText}>Choose Profile Picture</Text>
+        </TouchableOpacity>
       {profilepicture ? (
-        <Image source={{ uri: profilepicture }} style={styles.profileImage} />
+        <Image source={{ uri: profilepicture }} style={commonStyles.profileImage} />
       ) : null}
-      <Button title="Register" onPress={handleRegister} />
-      <Button
-        title="Already have an account? Login"
-        onPress={() => navigation.navigate('Login')}
-      />
+      <TouchableOpacity style={commonStyles.button} onPress={handleRegister}>
+          <Text style={commonStyles.buttonText}>Register</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={commonStyles.button} onPress={() => navigation.navigate('Login')}>
+          <Text style={commonStyles.buttonText}>Already have an account? Login</Text>
+        </TouchableOpacity>
     </View>
+    </ImageBackground>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 12,
-    paddingHorizontal: 8,
-  },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginTop: 10,
-    marginBottom: 10,
-  },
-});
-
 export default Register;

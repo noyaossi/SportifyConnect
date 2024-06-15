@@ -1,11 +1,13 @@
 // screens/Profile.js
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, ActivityIndicator, StyleSheet, Image, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, TextInput, Button, ActivityIndicator, StyleSheet, Image, TouchableOpacity, ScrollView, RefreshControl, ImageBackground } from 'react-native';
 import { logoutUser, checkLoginStatus  } from '../firebase/auth';
 import { getUser, updateUser  } from '../firebase/firestore';
 import BottomNavigationBar from '../components/BottomNavigationBar';
 import * as ImagePicker from 'expo-image-picker'; // Import ImagePicker
 import { uploadImageToStorage } from '../firebase/storage'; // Import uploadImageToStorage function
+import commonStyles from '../styles/styles'; // Import common styles
+
 
 
 const Profile = ({ navigation }) => {
@@ -196,6 +198,7 @@ const handleRefresh = () => {
 
       <BottomNavigationBar navigation={navigation} />
       </View>
+    
 
   );
 };

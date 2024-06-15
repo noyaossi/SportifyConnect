@@ -1,11 +1,12 @@
 // screens/Events.js
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image, RefreshControl, ScrollView} from 'react-native';
+import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image, RefreshControl, ScrollView, ActivityIndicator } from 'react-native';
 import { getEvents, getRegisteredEvents, unregisterForEvent, getCreatedEvents, handleDeleteEvent  } from '../firebase/firestore'; // Import function to fetch events and registered events from Firestore
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth to get the current user
 import { Ionicons } from '@expo/vector-icons'; // Assuming you have installed expo vector icons
 import BottomNavigationBar from '../components/BottomNavigationBar';
+import { useRefresh } from '../contexts/RefreshContext'; // Import RefreshContext
 
 
 const Events = ({ navigation }) => {
@@ -14,18 +15,18 @@ const Events = ({ navigation }) => {
   const [createdEvents, setCreatedEvents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const { currentUser } = useAuth(); // Get the current user from AuthContext
+  const [loading, setLoading] = useState(false); // Add loading state
+  const { refreshing: contextRefreshing } = useRefresh(); // Get refreshing state from RefreshContext
 
   const onRefresh = async () => {
     setRefreshing(true);
     try {
       const eventsData = await getEvents(); // Fetch events data from Firestore
       setEvents(eventsData); // Update state with fetched events
-      if (currentUser && currentUser.uid) {
-        const registeredEventsData = await getRegisteredEvents(currentUser.uid);
-        setRegisteredEvents(registeredEventsData);
-        const createdEventsData = await getCreatedEvents(currentUser.uid);
-        setCreatedEvents(createdEventsData);
-      }
+      const registeredEventsData = await getRegisteredEvents(currentUser.uid); // Fetch registered events data from Firestore
+      setRegisteredEvents(registeredEventsData); // Update registered events state
+      const createdEventsData = await getCreatedEvents(currentUser.uid); // Fetch created events data from Firestore
+      setCreatedEvents(createdEventsData); // Update created events state
     } catch (error) {
       console.error('Error fetching events:', error);
     } finally {
@@ -34,40 +35,32 @@ const Events = ({ navigation }) => {
   };
 
   useEffect(() => {
+    setLoading(true); // Set loading to true when fetching events
+
     // Fetch all events when the component mounts
     const fetchEvents = async () => {
       try {
         const eventsData = await getEvents(); // Fetch events data from Firestore
         setEvents(eventsData); // Update state with fetched events
+        const registeredEventsData = await getRegisteredEvents(currentUser.uid); // Fetch registered events data from Firestore
+        setRegisteredEvents(registeredEventsData); // Update registered events state
+        const createdEventsData = await getCreatedEvents(currentUser.uid); // Fetch created events data from Firestore
+        setCreatedEvents(createdEventsData); // Update created events state
       } catch (error) {
         console.error('Error fetching events:', error);
+      } finally {
+        setLoading(false); // Set loading to false after events are fetched
       }
     };
 
     fetchEvents(); // Call fetchEvents function
-  }, []);
+  }, [currentUser]);
 
   useEffect(() => {
-    // Fetch registered events when the current user changes
-    const fetchRegisteredAndCreatedEvents  = async () => {
-      if (!currentUser || !currentUser.uid) return; // Exit if no currentUser or UID
-    
-      try {
-        const registeredEventsData = await getRegisteredEvents(currentUser.uid);
-        if (registeredEventsData.length !== 0) { // Check if data is not empty
-          setRegisteredEvents(registeredEventsData);
-        }
-        const createdEventsData = await getCreatedEvents(currentUser.uid);
-        if (createdEventsData.length !== 0) {
-          setCreatedEvents(createdEventsData);
-        }
-      } catch (error) {
-        console.error('Error fetching registered or created events:', error);
-      }
-    };
-
-    fetchRegisteredAndCreatedEvents(); // Call fetchRegisteredEvents function
-  }, [currentUser]);
+    if (contextRefreshing) {
+      onRefresh();
+    }
+  }, [contextRefreshing]);
 
   const handleUnregister = async (eventId) => {
     try {

@@ -17,6 +17,8 @@ const EditEvent = ({ route, navigation }) => {
     description:'',
     picture: '',
   });
+  const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
     const fetchEventDetails = async () => {
@@ -52,10 +54,14 @@ const EditEvent = ({ route, navigation }) => {
  
   const handleSave = async () => {
     try {
+      setLoading(true);
+
       await updateEvent(eventId, eventDetails);
       alert('Event updated successfully!');
       navigation.goBack();
     } catch (error) {
+      setLoading(false);
+
       console.error('Error updating event:', error);
       alert('Error updating event.');
     }

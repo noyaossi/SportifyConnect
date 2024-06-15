@@ -1,11 +1,13 @@
 // screens/CreateEvent.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Image, Alert, ScrollView, KeyboardAvoidingView, Platform, ImageBackground, TouchableOpacity, Modal, FlatList } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-
 import { addEvent, createNewEvent } from '../firebase/firestore';
 import { uploadImage } from '../firebase/storage';
 import { useAuth } from '../contexts/AuthContext'; // Import AuthContext to get current user
+import commonStyles from '../styles/styles';
+
+const sports = ['Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball'];
 
 
 const CreateEvent = ({ navigation }) => {
@@ -16,6 +18,8 @@ const CreateEvent = ({ navigation }) => {
   const [participants, setParticipants] = useState('');
   const [description, setDescription] = useState('');
   const [picture, setPicture] = useState(null);
+  const [error, setError] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
   const { currentUser } = useAuth(); // Get the current user from AuthContext
 
 
@@ -60,6 +64,11 @@ const CreateEvent = ({ navigation }) => {
 
   const handleSubmit = async () => {
     try {
+      // Validate that all fields are filled
+    if (!eventName || !sportType || !location || !date || !participants || !description || !picture) {
+      setError('All fields are required.');
+      return;
+    }
       console.log('Submitting event:', eventName, sportType, location, date, participants, description);
 
       let pictureUrl = null;
@@ -85,6 +94,8 @@ const CreateEvent = ({ navigation }) => {
       await createNewEvent(currentUser.uid, eventId); // create new event 
 
       console.log('Event created with ID:', eventId);
+      // Submit the form (you can add your form submission logic here)
+    Alert.alert('Event Created', 'Your event has been created successfully.');
       navigation.navigate('Events');
     } catch (error) {
       console.error('Error creating event:', error);
@@ -92,6 +103,8 @@ const CreateEvent = ({ navigation }) => {
   };
 
   return (
+    <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.backgroundImage}>
+
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -139,9 +152,12 @@ const CreateEvent = ({ navigation }) => {
           <Button title="Select from Gallery" onPress={pickImage} />
           <Button title="Take a Photo" onPress={takePhoto} />
         </View>
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
         <Button title="Submit" onPress={handleSubmit} />
       </ScrollView>
     </KeyboardAvoidingView>
+    </ImageBackground>
+
   );
 };
 
@@ -174,6 +190,11 @@ const styles = StyleSheet.create({
     height: 200,
     resizeMode: 'cover',
     marginBottom: 12,
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 16,
   },
 });
 

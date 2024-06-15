@@ -1,8 +1,10 @@
 // screens/Login.js
 
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button } from 'react-native';
+import { View, Text, TextInput, ImageBackground, StyleSheet, TouchableOpacity } from 'react-native';
 import { loginUser } from '../firebase/auth';
+import commonStyles from '../styles/styles'; // Import common styles
+
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -24,26 +26,34 @@ const Login = ({ navigation }) => {
   };
 
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-     
-      <TextInput
+    <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.backgroundImage}>
+      <View style={commonStyles.container}>
+        <TextInput
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
-        style={{ borderWidth: 1, width: 200, marginVertical: 10, padding: 5 }}
+        style={commonStyles.input}
+        placeholderTextColor="#aaa" // Optional: Change placeholder text color
+
       />
       <TextInput
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        style={{ borderWidth: 1, width: 200, marginVertical: 10, padding: 5 }}
+        style={commonStyles.input}
+        placeholderTextColor="#aaa" // Optional: Change placeholder text color
       />
-      <Button title="Login" onPress={handleLogin} />
-      <Button title="Don't have an account? Register" onPress={handleRegister} /> 
-      {error ? <Text style={{ color: 'red' }}>{error}</Text> : null}
+      <TouchableOpacity style={commonStyles.button} onPress={handleLogin}>
+          <Text style={commonStyles.buttonText}>Login</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={commonStyles.button} onPress={handleRegister}>
+          <Text style={commonStyles.buttonText}>Don't have an account? Register</Text>
+        </TouchableOpacity>
+      {error ? <Text style={commonStyles.errorText}>{error}</Text> : null}
     </View>
+    </ImageBackground>
   );
 };
 
