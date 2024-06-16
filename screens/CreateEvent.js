@@ -1,26 +1,32 @@
 // screens/CreateEvent.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, Alert, ScrollView, KeyboardAvoidingView, Platform, ImageBackground, TouchableOpacity, Modal, FlatList } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Image, Alert, ScrollView, KeyboardAvoidingView, Platform, ImageBackground, TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { addEvent, createNewEvent } from '../firebase/firestore';
 import { uploadImage } from '../firebase/storage';
 import { useAuth } from '../contexts/AuthContext'; // Import AuthContext to get current user
 import commonStyles from '../styles/styles';
-
-const sports = ['Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball'];
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
 
 
 const CreateEvent = ({ navigation }) => {
   const [eventName, setEventName] = useState('');
   const [sportType, setSportType] = useState('');
   const [location, setLocation] = useState('');
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState(new Date());
+  const [time, setTime] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+
   const [participants, setParticipants] = useState('');
   const [description, setDescription] = useState('');
   const [picture, setPicture] = useState(null);
   const [error, setError] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
   const { currentUser } = useAuth(); // Get the current user from AuthContext
+
+  const sportOptions = ['Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball'];
+
 
 
   const getGalleryPermission = async () => {
@@ -43,7 +49,7 @@ const CreateEvent = ({ navigation }) => {
     });
 
     if (!result.canceled) {
-      console.log('Image picked:', result.assets[0].uri);
+      //console.log('Image picked:', result.assets[0].uri);
       setPicture(result.assets[0].uri);
     }
   };
@@ -57,43 +63,55 @@ const CreateEvent = ({ navigation }) => {
     });
 
     if (!result.canceled) {
-      console.log('Photo taken:', result.assets[0].uri);
+      //console.log('Photo taken:', result.assets[0].uri);
       setPicture(result.assets[0].uri);
     }
+  };
+
+  const handleDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShowDatePicker(false);
+    setDate(currentDate);
+  };
+  const handleTimeChange = (event, selectedTime) => {
+    const currentTime = selectedTime || time;
+    setShowTimePicker(false);
+    setTime(currentTime);
   };
 
   const handleSubmit = async () => {
     try {
       // Validate that all fields are filled
-    if (!eventName || !sportType || !location || !date || !participants || !description || !picture) {
+    if (!eventName || !sportType || !location || !date || !time || !participants || !description || !picture) {
       setError('All fields are required.');
       return;
     }
-      console.log('Submitting event:', eventName, sportType, location, date, participants, description);
+      //console.log('Submitting event:', eventName, sportType, location, date, participants, description);
 
       let pictureUrl = null;
       if (picture) {
-        console.log('Uploading image...');
+        //console.log('Uploading image...');
         pictureUrl = await uploadImage(picture);
-        console.log('Image uploaded, URL:', pictureUrl);
+        //console.log('Image uploaded, URL:', pictureUrl);
       }
 
       const newEvent = {
         eventName,
         sportType,
         location,
-        date,
-        participants,
+        date: date.toISOString(),
+        time: time.toISOString().split('T')[1].split('.')[0], // Save time in HH:MM:SS format
+        participants: Number(participants),
         description,
         picture: pictureUrl,
       };
 
-      console.log('New event object:', newEvent);
+      //console.log('New event object:', newEvent);
 
       const eventId = await addEvent(newEvent);
       await createNewEvent(currentUser.uid, eventId); // create new event 
 
-      console.log('Event created with ID:', eventId);
+      //console.log('Event created with ID:', eventId);
       // Submit the form (you can add your form submission logic here)
     Alert.alert('Event Created', 'Your event has been created successfully.');
       navigation.navigate('Events');
@@ -104,7 +122,6 @@ const CreateEvent = ({ navigation }) => {
 
   return (
     <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.backgroundImage}>
-
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -117,27 +134,51 @@ const CreateEvent = ({ navigation }) => {
           value={eventName}
           onChangeText={setEventName}
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Sport Type"
-          value={sportType}
-          onChangeText={setSportType}
-        />
+        <Text style={styles.label}>Sport Type</Text>
+          <View style={styles.pickerContainer}>
+            {sportOptions.map((option) => (
+              <TouchableOpacity
+                key={option}
+                style={styles.pickerItem}
+                onPress={() => setSportType(option)}
+              >
+                <Text style={styles.pickerItemText}>{option}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          <Text style={styles.selectedSportType}>{sportType}</Text>
         <TextInput
           style={styles.input}
           placeholder="Location"
           value={location}
           onChangeText={setLocation}
         />
-        <TextInput
-          style={styles.input}
-          placeholder="Date"
-          value={date}
-          onChangeText={setDate}
-        />
+        <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateInput}>
+            <Text style={styles.dateText}>{date.toDateString()}</Text>
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={date}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}
+            />
+          )}
+          <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.dateInput}>
+            <Text style={styles.dateText}>{time.toLocaleTimeString()}</Text>
+          </TouchableOpacity>
+          {showTimePicker && (
+            <DateTimePicker
+              value={time}
+              mode="time"
+              display="default"
+              onChange={handleTimeChange}
+            />
+          )}
         <TextInput
           style={styles.input}
           placeholder="Number Of Participants"
+          keyboardType="number-pad"
           value={participants}
           onChangeText={setParticipants}
         />
@@ -164,7 +205,7 @@ const CreateEvent = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   scrollContent: {
     padding: 20,
@@ -181,6 +222,42 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 12,
     padding: 8,
+    borderRadius: 5,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  pickerContainer: {
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 12,
+    padding: 8,
+    borderRadius: 5,
+  },
+  pickerItem: {
+    padding: 8,
+  },
+  pickerItemText: {
+    fontSize: 16,
+  },
+  selectedSportType: {
+    fontSize: 16,
+    marginBottom: 12,
+    color: 'gray',
+    textAlign: 'center',
+  },
+  dateInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 12,
+    justifyContent: 'center',
+    paddingLeft: 8,
+    borderRadius: 5,
+  },
+  dateText: {
+    fontSize: 16,
   },
   uploadPictureContainer: {
     marginBottom: 12,

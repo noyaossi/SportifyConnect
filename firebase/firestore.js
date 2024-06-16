@@ -1,7 +1,7 @@
 // firebase/firestore.js
 
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, getDocs, query, where, deleteDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, getDocs, deleteDoc } from 'firebase/firestore';
 import firebaseConfig from './firebaseConfig';
 
 // Initialize Firebase only if it hasn't been initialized yet
@@ -79,10 +79,10 @@ export const getEvents = async () => {
 // Function to fetch a single event by ID
 export const getEvent = async (eventId) => {
   try {
-    console.log(`Fetching event with ID: ${eventId}`);
+    //console.log(`Fetching event with ID: ${eventId}`);
     const eventDoc = await getDoc(doc(firestore, 'events', eventId));
     if (eventDoc.exists()) {
-      console.log(`Event found: ${JSON.stringify(eventDoc.data())}`);
+      //console.log(`Event found: ${JSON.stringify(eventDoc.data())}`);
       return { id: eventDoc.id, ...eventDoc.data() };
     } else {
       throw new Error('Event not found');
@@ -137,7 +137,7 @@ export const registerForEvent = async (userId, eventId) => {
   }
 };
 
-// Function to register for an event
+// Function to create a new event
 export const createNewEvent = async (userId, eventId) => {
   try {
     const userRef = doc(firestore, 'users', userId);
@@ -155,7 +155,7 @@ export const createNewEvent = async (userId, eventId) => {
       throw new Error('Can not create new event');
     }
   } catch (error) {
-    console.error('Error for create event:', error);
+    console.error('Error creating event:', error);
     throw error;
   }
 };

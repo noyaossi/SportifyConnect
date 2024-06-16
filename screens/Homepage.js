@@ -1,26 +1,22 @@
-// screens/Homepage.js
-
 import React, { useEffect, useState } from 'react';
-import { View, FlatList, Text, StyleSheet, Button, RefreshControl, Image  } from 'react-native';
-import { getEvents, registerForEvent } from '../firebase/firestore'; // Import function to fetch events and register for events from Firestore
-import { useAuth } from '../contexts/AuthContext'; // Import AuthContext to get current user
+import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image, ScrollView, RefreshControl } from 'react-native';
+import { getEvents, registerForEvent } from '../firebase/firestore';
+import { useAuth } from '../contexts/AuthContext';
 import BottomNavigationBar from '../components/BottomNavigationBar';
-import { NavigationContainer } from '@react-navigation/native';
-
-
+import { Ionicons } from '@expo/vector-icons';
+import { useRefresh } from '../contexts/RefreshContext';
 
 const Homepage = ({ navigation }) => {
-
-  <BottomNavigationBar navigation={navigation} />
   const [events, setEvents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const { currentUser } = useAuth(); // Get the current user from AuthContext
+  const { currentUser } = useAuth();
+  const { refreshing: contextRefreshing } = useRefresh();
 
   const onRefresh = async () => {
     setRefreshing(true);
     try {
-      const eventsData = await getEvents(); // Fetch events data from Firestore
-      setEvents(eventsData); // Update state with fetched events
+      const eventsData = await getEvents();
+      setEvents(eventsData);
     } catch (error) {
       console.error('Error fetching events:', error);
     } finally {
@@ -29,61 +25,76 @@ const Homepage = ({ navigation }) => {
   };
 
   useEffect(() => {
-    // Fetch events data when the component mounts
     const fetchEvents = async () => {
       try {
-        const eventsData = await getEvents(); // Fetch events data from Firestore
-        setEvents(eventsData); // Update state with fetched events
+        const eventsData = await getEvents();
+        setEvents(eventsData);
       } catch (error) {
         console.error('Error fetching events:', error);
       }
     };
+    fetchEvents();
+  }, [currentUser]);
 
-    fetchEvents(); // Call fetchEvents function
-  }, []);
+  useEffect(() => {
+    if (contextRefreshing) {
+      onRefresh();
+    }
+  }, [contextRefreshing]);
 
   const handleRegister = async (eventId) => {
     try {
-      await registerForEvent(currentUser.uid, eventId); // Register user for the event
+      await registerForEvent(currentUser.uid, eventId);
       alert('Registered successfully!');
-      onRefresh(); // Refresh the list of events
+      onRefresh();
     } catch (error) {
-      if (error.message === 'User already registered for this event') {
-        alert('You are already registered for this event.');
-      } else {
-        console.error('Error registering for event:', error);
-        alert('Error registering for event.');
-      }
+      console.error('Error registering for event:', error);
+      alert('Error registering for event.');
     }
   };
 
-  // Render each event item in a FlatList
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'long' };
+    return date.toLocaleDateString('en-US', options);
+  };
+
   const renderEventItem = ({ item }) => (
     <View style={styles.eventItem}>
       <View style={styles.eventDetailsContainer}>
         <Text style={styles.eventName}>{item.eventName}</Text>
-        <Text style={styles.eventDetails}>{item.location}, {item.date}</Text>
+        <Text style={styles.eventDetails}>{item.sportType}</Text>
+        <Text style={styles.eventDetails}>{item.location}</Text>
+        <Text style={styles.eventDetails}>{formatDate(item.date)}</Text>
+        <Text style={styles.eventDetails}>{(item.time)}</Text>
+        <Text style={styles.eventDetails}>Participants: {item.participants}</Text>
+        <Text style={styles.eventDetails}>{item.description}</Text>
       </View>
       {item.picture && <Image source={{ uri: item.picture }} style={styles.eventImage} />}
-      <Button
-        title="Register"
-        onPress={() => handleRegister(item.id)}
-        color="green"
-      />
+      <Button title="Register" onPress={() => handleRegister(item.id)} />
     </View>
   );
 
   return (
     <View style={styles.maincontainer}>
-            <Text style={styles.header}>Explore Events</Text>
-      <View style={styles.container}>
-        <FlatList
-          data={events}
-          renderItem={renderEventItem}
-          keyExtractor={(item) => item.id} // Assuming each event has a unique identifier
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        />
-      </View>
+      <ScrollView
+        contentContainerStyle={styles.scrollViewContent}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <View style={styles.container}>
+          <Text style={styles.header}>Explore Events:</Text>
+          {events.length === 0 ? (
+            <Text>No events available at the moment.</Text>
+          ) : (
+            <FlatList
+              data={events}
+              renderItem={renderEventItem}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+            />
+          )}
+        </View>
+      </ScrollView>
       <BottomNavigationBar navigation={navigation} />
     </View>
   );
@@ -94,16 +105,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
+  scrollViewContent: {
+    paddingBottom: 100,
+  },
   container: {
     flex: 1,
     backgroundColor: 'white',
     padding: 20,
-    paddingBottom: 100, // Increased padding from 20 to 100
+    paddingBottom: 100,
   },
   header: {
     fontSize: 24,
     marginVertical: 10,
-    textAlign: 'center',
   },
   eventItem: {
     marginBottom: 10,
@@ -132,6 +145,18 @@ const styles = StyleSheet.create({
     height: 100,
     resizeMode: 'cover',
     borderRadius: 10,
+  },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 80,
+    backgroundColor: '#1E90FF',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
   },
 });
 

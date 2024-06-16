@@ -1,7 +1,7 @@
 // screens/Events.js
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image, RefreshControl, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image, RefreshControl, ScrollView, ActivityIndicator  } from 'react-native';
 import { getEvents, getRegisteredEvents, unregisterForEvent, getCreatedEvents, handleDeleteEvent  } from '../firebase/firestore'; // Import function to fetch events and registered events from Firestore
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth to get the current user
 import { Ionicons } from '@expo/vector-icons'; // Assuming you have installed expo vector icons
@@ -73,48 +73,61 @@ const Events = ({ navigation }) => {
     }
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'long' };
+    return date.toLocaleDateString('en-US', options);
+  };
+
   // Render each event item in a FlatList
   const renderEventItem = ({ item }) => (
     <View style={styles.eventItem}>
       <View style={styles.eventDetailsContainer}>
         <Text style={styles.eventName}>{item.eventName}</Text>
-        <Text style={styles.eventDetails}>{item.location}, {item.date}, {item.time}</Text>
+        <Text style={styles.eventDetails}>{item.sportType}</Text>
+        <Text style={styles.eventDetails}>{item.location}</Text>
+        <Text style={styles.eventDetails}>{formatDate(item.date)}</Text>
+        <Text style={styles.eventDetails}>{(item.time)}</Text>
+        <Text style={styles.eventDetails}>Participants: {item.participants}</Text>
+        <Text style={styles.eventDetails}>{item.description}</Text>
       </View>
       {item.picture && <Image source={{ uri: item.picture }} style={styles.eventImage} />}
     </View>
   );
 
+
   const renderRegisteredEventItem = ({ item }) => (
     <View style={styles.eventItem}>
       <View style={styles.eventDetailsContainer}>
         <Text style={styles.eventName}>{item.eventName}</Text>
-        <Text style={styles.eventDetails}>{item.location}, {item.date}, {item.time}</Text>
+        <Text style={styles.eventDetails}>{item.sportType}</Text>
+        <Text style={styles.eventDetails}>{item.location}</Text>
+        <Text style={styles.eventDetails}>{formatDate(item.date)}</Text>
+        <Text style={styles.eventDetails}>{(item.time)}</Text>
+        <Text style={styles.eventDetails}>Participants: {item.participants}</Text>
+        <Text style={styles.eventDetails}>{item.description}</Text>
       </View>
       {item.picture && <Image source={{ uri: item.picture }} style={styles.eventImage} />}
-      <Button
-        title="Unregister"
-        onPress={() => handleUnregister(item.id)}
-        color="red"
-      />
+      <Button title="Unregister" onPress={() => handleUnregister(item.id)} color="red" />
     </View>
   );
   const renderCreatedEventItem = ({ item }) => (
     <View style={styles.eventItem}>
       <View style={styles.eventDetailsContainer}>
         <Text style={styles.eventName}>{item.eventName}</Text>
-        <Text style={styles.eventDetails}>{item.location}, {item.date}, {item.time}</Text>
+        <Text style={styles.eventDetails}>{item.sportType}</Text>
+        <Text style={styles.eventDetails}>{item.location}</Text>
+        <Text style={styles.eventDetails}>{formatDate(item.date)}</Text>
+        <Text style={styles.eventDetails}>{(item.time)}</Text>
+        <Text style={styles.eventDetails}>Participants: {item.participants}</Text>
+        <Text style={styles.eventDetails}>{item.description}</Text>
       </View>
       {item.picture && <Image source={{ uri: item.picture }} style={styles.eventImage} />}
       <View style={styles.buttonContainer}>
-      <Button
-        title="Edit"
-        onPress={() => navigation.navigate('EditEvent', { eventId: item.id })}
-        color="blue"
-      />
-    </View>
+        <Button title="Edit" onPress={() => navigation.navigate('EditEvent', { eventId: item.id })} color="blue" />
+      </View>
     </View>
   );
-
 
   return (
     <View style={styles.maincontainer}>
