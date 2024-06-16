@@ -5,9 +5,15 @@ import { useAuth } from '../contexts/AuthContext';
 import BottomNavigationBar from '../components/BottomNavigationBar';
 import { Ionicons } from '@expo/vector-icons';
 import { useRefresh } from '../contexts/RefreshContext';
+import { Calendar } from 'react-native-calendars';
+
+const sportOptions = ['All Events', 'Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball'];
 
 const Homepage = ({ navigation }) => {
   const [events, setEvents] = useState([]);
+  const [filteredEvents, setFilteredEvents] = useState([]);
+  const [selectedSport, setSelectedSport] = useState('All Events');
+  const [selectedDate, setSelectedDate] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const { currentUser } = useAuth();
   const { refreshing: contextRefreshing } = useRefresh();
@@ -17,6 +23,7 @@ const Homepage = ({ navigation }) => {
     try {
       const eventsData = await getEvents();
       setEvents(eventsData);
+      setFilteredEvents(eventsData);
     } catch (error) {
       console.error('Error fetching events:', error);
     } finally {
@@ -29,6 +36,7 @@ const Homepage = ({ navigation }) => {
       try {
         const eventsData = await getEvents();
         setEvents(eventsData);
+        setFilteredEvents(eventsData);
       } catch (error) {
         console.error('Error fetching events:', error);
       }
@@ -59,6 +67,20 @@ const Homepage = ({ navigation }) => {
     return date.toLocaleDateString('en-US', options);
   };
 
+  const filterEvents = () => {
+    let filtered = events;
+    if (selectedSport && selectedSport !== 'All Events') {
+      filtered = filtered.filter(event => event.sportType.toLowerCase() === selectedSport.toLowerCase());
+    }
+    if (selectedDate && selectedSport !== 'All Events') {
+      filtered = filtered.filter(event => new Date(event.date).toDateString() === new Date(selectedDate).toDateString());
+    }
+    setFilteredEvents(filtered);
+  };
+  useEffect(() => {
+    filterEvents();
+  }, [selectedSport, selectedDate, events]);
+
   const renderEventItem = ({ item }) => (
     <View style={styles.eventItem}>
       <View style={styles.eventDetailsContainer}>
@@ -82,12 +104,36 @@ const Homepage = ({ navigation }) => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <View style={styles.container}>
+        <Calendar
+            onDayPress={day => setSelectedDate(day.dateString)}
+            markedDates={{
+              [selectedDate]: { selected: true, selectedColor: 'blue' }
+            }}
+          />
+          <View style={styles.sportFilterContainer}>
+            {sportOptions.map(option => (
+              <TouchableOpacity
+                key={option}
+                style={[
+                  styles.sportFilterButton,
+                  selectedSport === option && styles.sportFilterButtonSelected
+                ]}
+                onPress={() => {
+                  setSelectedSport(option);
+                  if (option === 'All Events') {
+                    setSelectedDate(null); // Reset date when "All Events" is selected
+                  }
+                }}              >
+                <Text style={styles.sportFilterButtonText}>{option}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
           <Text style={styles.header}>Explore Events:</Text>
-          {events.length === 0 ? (
+          {filteredEvents.length === 0 ? (
             <Text>No events available at the moment.</Text>
           ) : (
             <FlatList
-              data={events}
+              data={filteredEvents}
               renderItem={renderEventItem}
               keyExtractor={(item) => item.id}
               scrollEnabled={false}
@@ -145,6 +191,24 @@ const styles = StyleSheet.create({
     height: 100,
     resizeMode: 'cover',
     borderRadius: 10,
+  },
+  sportFilterContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginVertical: 10,
+  },
+  sportFilterButton: {
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 20,
+    padding: 10,
+    margin: 5,
+  },
+  sportFilterButtonSelected: {
+    backgroundColor: 'blue',
+  },
+  sportFilterButtonText: {
+    color: 'black',
   },
   fab: {
     position: 'absolute',

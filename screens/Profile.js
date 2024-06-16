@@ -7,6 +7,8 @@ import BottomNavigationBar from '../components/BottomNavigationBar';
 import * as ImagePicker from 'expo-image-picker'; // Import ImagePicker
 import { uploadImageToStorage } from '../firebase/storage'; // Import uploadImageToStorage function
 import commonStyles from '../styles/styles'; // Import common styles
+import { Ionicons } from '@expo/vector-icons'; // Import Ionicons
+
 
 
 
@@ -108,97 +110,100 @@ const handleRefresh = () => {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" />
       </View>
     );
   }
 
   return (
+
     <View style={styles.container}>
     <ScrollView
         contentContainerStyle={styles.scrollViewContent}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
       >
       {userDetails ? (
-        <View style={styles.profileContainer}>
-          <Image
-            source={{ uri: userDetails.profilepicture || 'https://via.placeholder.com/150' }}
-            style={styles.profileImage}
-          />
-          {isEditing ? (
-            <>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>First Name:</Text>
-                <TextInput
-                  style={styles.input}
-                  value={updatedDetails.firstname}
-                  onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, firstname: text })}
-                />
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Last Name:</Text>
-                <TextInput
-                  style={styles.input}
-                  value={updatedDetails.lastname}
-                  onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, lastname: text })}
-                />
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Email:</Text>
-                <TextInput
-                  style={styles.input}
-                  value={updatedDetails.email}
-                  onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, email: text })}
-                />
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Mobile Number:</Text>
-                <TextInput
-                  style={styles.input}
-                  value={updatedDetails.mobilenumber}
-                  onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, mobilenumber: text })}
-                />
-              </View>
-              <TouchableOpacity style={styles.button} onPress={pickNewProfilePicture}>
-                <Text style={styles.buttonText}>Change Profile Picture</Text>
+          <View style={styles.profileContainer}>
+            <ImageBackground source={{ uri: userDetails.profilepicture || 'https://via.placeholder.com/150' }} style={styles.profileImageBackground} imageStyle={styles.profileImageBackgroundImage}>
+              <TouchableOpacity style={styles.profileImageEditButton} onPress={pickNewProfilePicture}>
+                <Ionicons name="camera" size={24} color="white" />
               </TouchableOpacity>
-              <Button title="Save" onPress={handleSave} />
-              <Button title="Cancel" onPress={() => setIsEditing(false)} />
-            </>
-                 
-
-          ) : (
-            <>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>First Name:</Text>
-                <Text style={styles.value}>{userDetails.firstname}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Last Name:</Text>
-                <Text style={styles.value}>{userDetails.lastname}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Email:</Text>
-                <Text style={styles.value}>{userDetails.email}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Text style={styles.label}>Mobile Number:</Text>
-                <Text style={styles.value}>{userDetails.mobilenumber}</Text>
-              </View>
-              <Button title="Edit Profile" onPress={() => setIsEditing(true)} />
-            </>
-          )}
-          <Button title="Logout" onPress={handleLogout} style={styles.logoutButton} />
-        </View>
-      ) : (
-        <Text style={styles.errorText}>No user details found.</Text>
-      )}
-          </ScrollView>
-
+            </ImageBackground>
+            {isEditing ? (
+              <>
+                <View style={styles.detailRow}>
+                  <Text style={styles.label}>First Name:</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={updatedDetails.firstname}
+                    onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, firstname: text })}
+                  />
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.label}>Last Name:</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={updatedDetails.lastname}
+                    onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, lastname: text })}
+                  />
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.label}>Email:</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={updatedDetails.email}
+                    onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, email: text })}
+                  />
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.label}>Mobile Number:</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={updatedDetails.mobilenumber}
+                    onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, mobilenumber: text })}
+                  />
+                </View>
+                <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+                  <Text style={styles.buttonText}>Save</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.cancelButton} onPress={() => setIsEditing(false)}>
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <View style={styles.detailRow}>
+                  <Text style={styles.label}>First Name:</Text>
+                  <Text style={styles.value}>{userDetails.firstname}</Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.label}>Last Name:</Text>
+                  <Text style={styles.value}>{userDetails.lastname}</Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.label}>Email:</Text>
+                  <Text style={styles.value}>{userDetails.email}</Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <Text style={styles.label}>Mobile Number:</Text>
+                  <Text style={styles.value}>{userDetails.mobilenumber}</Text>
+                </View>
+                <TouchableOpacity style={styles.editButton} onPress={() => setIsEditing(true)}>
+                  <Text style={styles.buttonText}>Edit Profile</Text>
+                </TouchableOpacity>
+              </>
+            )}
+            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+              <Text style={styles.buttonText}>Logout</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <Text style={styles.errorText}>No user details found.</Text>
+        )}
+      </ScrollView>
       <BottomNavigationBar navigation={navigation} />
-      </View>
-    
+    </View>
 
   );
 };
@@ -208,29 +213,49 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0f0f0',
   },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   profileContainer: {
     alignItems: 'center',
     paddingTop: 20,
   },
-  profileImage: {
+  profileImageBackground: {
     width: 150,
     height: 150,
     borderRadius: 75,
+    overflow: 'hidden',
     marginBottom: 20,
+  },
+  profileImageBackgroundImage: {
+    resizeMode: 'cover',
+  },
+  profileImageEditButton: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    padding: 5,
+    borderRadius: 15,
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
+    width: '90%',
   },
   label: {
     fontSize: 18,
     fontWeight: 'bold',
     marginRight: 10,
+    width: 120,
   },
   value: {
     fontSize: 18,
     color: '#888',
+    flex: 1,
   },
   input: {
     fontSize: 18,
@@ -245,13 +270,44 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginTop: 10,
+    width: '90%',
+    alignItems: 'center',
+  },
+  saveButton: {
+    backgroundColor: 'blue',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    width: '90%',
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: 'gray',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    width: '90%',
+    alignItems: 'center',
+  },
+  editButton: {
+    backgroundColor: 'blue',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    width: '90%',
+    alignItems: 'center',
+  },
+  logoutButton: {
+    backgroundColor: 'red',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
+    width: '90%',
+    alignItems: 'center',
   },
   buttonText: {
     color: 'white',
     fontSize: 16,
-  },
-  logoutButton: {
-    marginTop: 20,
   },
   errorText: {
     fontSize: 18,
