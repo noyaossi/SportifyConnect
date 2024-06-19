@@ -7,9 +7,7 @@ import firebaseConfig from './firebase/firebaseConfig';
 import AppNavigator from './navigation/AppNavigator';
 import AuthNavigator from './navigation/AuthNavigator';
 import { checkLoginStatus } from './firebase/auth';
-import BottomNavigationBar from './components/BottomNavigationBar'; // Import your BottomNavigationBar component
 import { AuthProvider } from './contexts/AuthContext'; // Import AuthProvider
-import { getFirestore } from 'firebase/firestore';
 import { RefreshProvider } from './contexts/RefreshContext';
 
 
@@ -58,7 +56,6 @@ function App() {
       <NavigationContainer>
       <RefreshProvider>
         {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}
-        {/* <BottomNavigationBar />  */}
         </RefreshProvider>
       </NavigationContainer>
     </AuthProvider>

@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image, ScrollView, RefreshControl, ActivityIndicator  } from 'react-native';
 import { getEvents, registerForEvent } from '../firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import BottomNavigationBar from '../components/BottomNavigationBar';
 import { Ionicons } from '@expo/vector-icons';
 import { useRefresh } from '../contexts/RefreshContext';
 import { Calendar } from 'react-native-calendars';
+import axios from 'axios';
+import * as Location from 'expo-location';
 
 const sportOptions = ['All Events', 'Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball'];
 
@@ -15,6 +17,9 @@ const Homepage = ({ navigation }) => {
   const [selectedSport, setSelectedSport] = useState('All Events');
   const [selectedDate, setSelectedDate] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [weatherData, setWeatherData] = useState(null);
+  const [loadingWeather, setLoadingWeather] = useState(true);
+  const [error, setError] = useState(null);
   const { currentUser } = useAuth();
   const { refreshing: contextRefreshing } = useRefresh();
 
@@ -24,8 +29,10 @@ const Homepage = ({ navigation }) => {
       const eventsData = await getEvents();
       setEvents(eventsData);
       setFilteredEvents(eventsData);
+      await fetchWeatherData();
+
     } catch (error) {
-      console.error('Error fetching events:', error);
+      console.error('Error fetching events or weather data:', error);
     } finally {
       setRefreshing(false);
     }
@@ -37,6 +44,8 @@ const Homepage = ({ navigation }) => {
         const eventsData = await getEvents();
         setEvents(eventsData);
         setFilteredEvents(eventsData);
+        await fetchWeatherData();
+
       } catch (error) {
         console.error('Error fetching events:', error);
       }
@@ -50,6 +59,7 @@ const Homepage = ({ navigation }) => {
     }
   }, [contextRefreshing]);
 
+
   const handleRegister = async (eventId) => {
     try {
       await registerForEvent(currentUser.uid, eventId);
@@ -60,6 +70,34 @@ const Homepage = ({ navigation }) => {
       alert('Error registering for event.');
     }
   };
+
+  const fetchWeatherData = async () => {
+    try {
+      setLoadingWeather(true);
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setError('Permission to access location was denied');
+        setLoadingWeather(false);
+        return;
+      }
+      let location = await Location.getCurrentPositionAsync({});
+      console.log('Location:', location);
+      const response = await axios.get(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${location.coords.latitude}&lon=${location.coords.longitude}&appid=5f435da82d04bcec261dc93d63e64de6`
+      );
+      console.log('API Response:', response.data);
+      setWeatherData(response.data);
+      setError(null);  // Clear any previous errors
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+      setError(error.message);
+    } finally {
+      setLoadingWeather(false);
+    }
+  };
+
+  const kelvinToCelsius = (temp) => (temp - 273.15).toFixed(2);
+  const kelvinToFahrenheit = (temp) => ((temp - 273.15) * 9/5 + 32).toFixed(2);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -102,8 +140,24 @@ const Homepage = ({ navigation }) => {
       <ScrollView
         contentContainerStyle={styles.scrollViewContent}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
+      > 
         <View style={styles.container}>
+        <Text style={styles.header}>Current Weather:</Text>
+          {loadingWeather ? (
+            <ActivityIndicator size="large" color="#0000ff" />
+          ) : error ? (
+            <Text style={styles.errorText}>Error fetching weather data: {error}</Text>
+          ) : weatherData ? (
+            <View style={styles.weatherContainer}>
+              <Text style={styles.weatherText}>Location: {weatherData.name}</Text>
+              <Text style={styles.weatherText}>Description: {weatherData.weather[0].description}</Text>
+              <Text style={styles.weatherText}>Temperature: {kelvinToCelsius(weatherData.main.temp)}°C / {kelvinToFahrenheit(weatherData.main.temp)}°F</Text>
+              <Text style={styles.weatherText}>Feels Like: {kelvinToCelsius(weatherData.main.feels_like)}°C / {kelvinToFahrenheit(weatherData.main.feels_like)}°F</Text>
+              <Text style={styles.weatherText}>Humidity: {weatherData.main.humidity}%</Text>
+            </View>
+          ) : (
+            <Text>No weather data available at the moment.</Text>
+          )}
         <Calendar
             onDayPress={day => setSelectedDate(day.dateString)}
             markedDates={{
@@ -139,6 +193,7 @@ const Homepage = ({ navigation }) => {
               scrollEnabled={false}
             />
           )}
+         
         </View>
       </ScrollView>
       <BottomNavigationBar navigation={navigation} />
@@ -221,6 +276,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 8,
+  },
+  weatherContainer: {
+    marginTop: 20,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+  },
+  weatherText: {
+    fontSize: 16,
+    color: '#888',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 16,
   },
 });
 
