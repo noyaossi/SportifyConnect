@@ -79,6 +79,23 @@ const Events = ({ navigation }) => {
     return date.toLocaleDateString('en-US', options);
   };
 
+// Function to format time
+const formatTime = (timeString) => {
+  console.log("time in events:", timeString);
+
+  if (!timeString) {
+    return 'Invalid time2';
+  }
+  // Split the time string into parts
+  const [hour, minute] = timeString.split(':');
+  // Check if hour and minute are defined
+  if (hour === undefined || minute === undefined) {
+    return 'Invalid time2';
+  }
+  return hour + ':' + minute;
+};
+  
+
   // Render each event item in a FlatList
   const renderEventItem = ({ item }) => (
     <View style={styles.eventItem}>
@@ -87,7 +104,7 @@ const Events = ({ navigation }) => {
         <Text style={styles.eventDetails}>{item.sportType}</Text>
         <Text style={styles.eventDetails}>{item.location}</Text>
         <Text style={styles.eventDetails}>{formatDate(item.date)}</Text>
-        <Text style={styles.eventDetails}>{(item.time)}</Text>
+        <Text style={styles.eventDetails}>{formatTime(item.time)}</Text>
         <Text style={styles.eventDetails}>Participants: {item.participants}</Text>
         <Text style={styles.eventDetails}>{item.description}</Text>
       </View>
@@ -103,7 +120,7 @@ const Events = ({ navigation }) => {
         <Text style={styles.eventDetails}>{item.sportType}</Text>
         <Text style={styles.eventDetails}>{item.location}</Text>
         <Text style={styles.eventDetails}>{formatDate(item.date)}</Text>
-        <Text style={styles.eventDetails}>{(item.time)}</Text>
+        <Text style={styles.eventDetails}>{formatTime(item.time)}</Text>
         <Text style={styles.eventDetails}>Participants: {item.participants}</Text>
         <Text style={styles.eventDetails}>{item.description}</Text>
       </View>
@@ -118,7 +135,7 @@ const Events = ({ navigation }) => {
         <Text style={styles.eventDetails}>{item.sportType}</Text>
         <Text style={styles.eventDetails}>{item.location}</Text>
         <Text style={styles.eventDetails}>{formatDate(item.date)}</Text>
-        <Text style={styles.eventDetails}>{(item.time)}</Text>
+        <Text style={styles.eventDetails}>{formatTime(item.time)}</Text>
         <Text style={styles.eventDetails}>Participants: {item.participants}</Text>
         <Text style={styles.eventDetails}>{item.description}</Text>
       </View>

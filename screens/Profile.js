@@ -48,7 +48,6 @@ const Profile = ({ navigation }) => {
     };
 
 
-
 // Function to handle the selection of a new profile picture
 const pickNewProfilePicture = async () => {
   try {

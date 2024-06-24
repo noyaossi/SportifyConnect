@@ -106,6 +106,20 @@ const Homepage = ({ navigation }) => {
     return date.toLocaleDateString('en-US', options);
   };
 
+  const formatTime = (timeString) => {
+    console.log("time in homepage:", timeString);
+    if (!timeString) {
+      return 'Invalid time2';
+    }
+    // Split the time string into parts
+    const [hour, minute] = timeString.split(':');
+    // Check if hour and minute are defined
+    if (hour === undefined || minute === undefined) {
+      return 'Invalid time2';
+    }
+    return hour + ':' + minute;
+  };
+    
   const filterEvents = () => {
     let filtered = events;
     if (selectedSport && selectedSport !== 'All Events') {
@@ -114,6 +128,8 @@ const Homepage = ({ navigation }) => {
     if (selectedDate && selectedSport !== 'All Events') {
       filtered = filtered.filter(event => new Date(event.date).toDateString() === new Date(selectedDate).toDateString());
     }
+
+    //TODO: add to filter by date
     setFilteredEvents(filtered);
   };
   useEffect(() => {
@@ -127,7 +143,7 @@ const Homepage = ({ navigation }) => {
         <Text style={styles.eventDetails}>{item.sportType}</Text>
         <Text style={styles.eventDetails}>{item.location}</Text>
         <Text style={styles.eventDetails}>{formatDate(item.date)}</Text>
-        <Text style={styles.eventDetails}>{(item.time)}</Text>
+        <Text style={styles.eventDetails}>{formatTime(item.time)}</Text>
         <Text style={styles.eventDetails}>Participants: {item.participants}</Text>
         <Text style={styles.eventDetails}>{item.description}</Text>
       </View>
