@@ -105,7 +105,7 @@ export const getRegisteredEvents = async (userId) => {
 
     const userData = userSnap.data();
     const registeredEventIds = userData.registeredEvents || [];
-
+    
     const eventsCollection = collection(firestore, 'events');
     const q = query(eventsCollection, where('__name__', 'in', registeredEventIds));
     const eventsSnapshot = await getDocs(q);

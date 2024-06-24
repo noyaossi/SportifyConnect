@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { ActivityIndicator, View } from 'react-native';
+import { useFonts } from 'expo-font';
 import { getApps, initializeApp } from 'firebase/app';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 import firebaseConfig from './firebase/firebaseConfig';
@@ -44,6 +45,7 @@ function App() {
     initializeAuth();
   }, []);
 
+  
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -51,6 +53,22 @@ function App() {
       </View>
     );
   }
+  //check the fonts????????????
+  const [fontsLoaded] = useFonts({
+    'Nunito-Regular': require('./assets/fonts/Nunito-Regular.ttf'),
+    'Nunito-Bold': require('./assets/fonts/Nunito-Bold.ttf'),
+  });
+
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return <ActivityIndicator />;
+  }
+
 
   return (
     <AuthProvider>
