@@ -84,7 +84,7 @@ const Homepage = ({ navigation }) => {
       let location = await Location.getCurrentPositionAsync({});
       console.log('Location:', location);
       const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${location.coords.latitude}&lon=${location.coords.longitude}&appid=${process.env.OPENWEATHERMAP_API_KEY}`
+        `https://api.openweathermap.org/data/2.5/weather?lat=${location.coords.latitude}&lon=${location.coords.longitude}&appid=${OPENWEATHERMAP_API_KEY}`
       );
       console.log('API Response:', response.data);
       setWeatherData(response.data);

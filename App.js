@@ -52,21 +52,6 @@ function App() {
       </View>
     );
   }
-  //check the fonts????????????
-  const [fontsLoaded] = useFonts({
-    'Nunito-Regular': require('./assets/fonts/Nunito-Regular.ttf'),
-    'Nunito-Bold': require('./assets/fonts/Nunito-Bold.ttf'),
-  });
-
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
-      await SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
-  if (!fontsLoaded) {
-    return <ActivityIndicator />;
-  }
 
 
   return (
