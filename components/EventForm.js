@@ -1,8 +1,9 @@
 // components/EventForm.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, Alert, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, TouchableOpacity, Image } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import * as ImagePicker from 'expo-image-picker';
+import ImagePickerComponent from '../components/ImagePickerComponent';
+
 
 const EventForm = ({ onSubmit, initialData = {} }) => {
   const [eventName, setEventName] = useState(initialData.eventName || '');
@@ -24,18 +25,6 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
     }
   }, [initialData.participants]);
 
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setPicture(result.assets[0].uri);
-    }
-  };
 
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -50,6 +39,10 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
   };
 
   const handleSubmit = () => {
+    if (!eventName || !sportType || !location || !date || !time || !participants || !description || !picture) {
+      Alert.alert('Error', 'All fields are required.');
+      return;
+    }
     const formattedDate = date.toISOString().split('T')[0];
     const formattedTime = time.toTimeString().split(' ')[0];
     const eventToSubmit = {
@@ -129,10 +122,7 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
         value={description}
         onChangeText={setDescription}
       />
-      <View style={styles.uploadPictureContainer}>
-        {picture && <Image source={{ uri: picture }} style={styles.image} />}
-        <Button title="Select from Gallery" onPress={pickImage} />
-      </View>
+            <ImagePickerComponent initialImage={picture} onImagePicked={setPicture}  buttonText="Choose from Gallery" />
       <Button title="Submit" onPress={handleSubmit} />
     </ScrollView>
   );
@@ -190,9 +180,6 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 16,
-  },
-  uploadPictureContainer: {
-    marginBottom: 12,
   },
   image: {
     width: '100%',

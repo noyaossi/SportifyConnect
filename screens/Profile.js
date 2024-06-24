@@ -1,333 +1,142 @@
-// screens/Profile.js
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, ActivityIndicator, StyleSheet, Image, TouchableOpacity, ScrollView, RefreshControl, ImageBackground } from 'react-native';
-import { logoutUser, checkLoginStatus  } from '../firebase/auth';
-import { getUser, updateUser  } from '../firebase/firestore';
-import BottomNavigationBar from '../components/BottomNavigationBar';
-import * as ImagePicker from 'expo-image-picker'; // Import ImagePicker
-import { uploadImageToStorage } from '../firebase/storage'; // Import uploadImageToStorage function
-import commonStyles from '../styles/styles'; // Import common styles
-import { Ionicons } from '@expo/vector-icons'; // Import Ionicons
-
-
-
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, Alert, ScrollView, ImageBackground } from 'react-native';
+import { useAuth } from '../contexts/AuthContext';
+import { getUser, updateUser } from '../firebase/firestore';
+import ImagePickerComponent from '../components/ImagePickerComponent';
+import BottomNavigationBar from '../components/BottomNavigationBar'; // Import BottomNavigationBar
+import commonStyles from '../styles/styles';
 
 const Profile = ({ navigation }) => {
-  const [userDetails, setUserDetails] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [updatedDetails, setUpdatedDetails] = useState({});
-  const [newProfilePicture, setNewProfilePicture] = useState(null); // New state for storing the selected picture
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { currentUser, logout } = useAuth();
+  const [userData, setUserData] = useState(null);
+  const [editing, setEditing] = useState(false);
+  const [profilePicture, setProfilePicture] = useState('');
 
   useEffect(() => {
-    fetchUserDetails();
-  }, []);
-
-    const fetchUserDetails = async () => {
-      setIsRefreshing(true);
-
+    const fetchUserData = async () => {
       try {
-        const user = await checkLoginStatus();
-        if (user) {
-          const details = await getUser(user.uid);
-          setUserDetails(details);
-          setUpdatedDetails(details); // Initialize updatedDetails with current user details
-
-        } else {
-          navigation.navigate('Login');
-        }
+        const data = await getUser(currentUser.uid);
+        setUserData(data);
+        setProfilePicture(data.profilepicture);
       } catch (error) {
-        console.error('Error fetching user details:', error);
-      } finally {
-        setIsLoading(false);
-        setIsRefreshing(false);
-
+        console.error('Error fetching user data:', error);
       }
     };
 
+    fetchUserData();
+  }, [currentUser]);
 
-
-// Function to handle the selection of a new profile picture
-const pickNewProfilePicture = async () => {
-  try {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Sorry, we need camera roll permissions to make this work!');
-      return;
+  const handleUpdate = async () => {
+    try {
+      const updatedUser = {
+        ...userData,
+        profilepicture: profilePicture,
+      };
+      await updateUser(currentUser.uid, updatedUser);
+      Alert.alert('Profile Updated', 'Your profile has been updated successfully.');
+      setEditing(false);
+    } catch (error) {
+      console.error('Error updating user data:', error);
+      Alert.alert('Update Failed', 'Failed to update profile. Please try again.');
     }
-
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      console.log('New profile picture picked:', result.assets[0].uri);
-      setNewProfilePicture(result.assets[0].uri);
-    }
-  } catch (error) {
-    console.error('Error accessing gallery:', error);
-  }
-};
+  };
 
   const handleLogout = async () => {
     try {
-      await logoutUser();
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Login' }],
-      });
+      await logout();
+      navigation.navigate('Login');
     } catch (error) {
       console.error('Error logging out:', error);
     }
   };
-// Function to handle saving changes
-const handleSave = async () => {
-  try {
-    const user = await checkLoginStatus();
-    if (user) {
-      const updatedUserDetails = { ...userDetails }; // Clone the userDetails object
-      if (newProfilePicture) {
-        console.log('Uploading new profile picture...');
-        const profilePictureUrl = await uploadImageToStorage(newProfilePicture);
-        updatedUserDetails.profilepicture = profilePictureUrl; // Update the profile picture URL
-        setNewProfilePicture(null); // Clear the selected picture
-      }
-
-      // Update other details if they have changed
-      Object.keys(updatedDetails).forEach(key => {
-        if (updatedDetails[key] !== userDetails[key]) {
-          updatedUserDetails[key] = updatedDetails[key];
-        }
-      });
-
-      await updateUser(user.uid, updatedUserDetails);
-      setUserDetails(updatedUserDetails);
-      setIsEditing(false);
-      console.log('Profile updated successfully!');
-    }
-  } catch (error) {
-    console.error('Error updating profile:', error);
-  }
-};
-const handleRefresh = () => {
-  fetchUserDetails();
-};
-
-  if (isLoading) {
-    return (
-      <View style={styles.loaderContainer}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollViewContent}
-        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
-      >
-        {userDetails ? (
-          <View style={styles.profileContainer}>
-            <ImageBackground source={{ uri: userDetails.profilepicture || 'https://via.placeholder.com/150' }} style={styles.profileImageBackground} imageStyle={styles.profileImageBackgroundImage}>
-              {isEditing && (
-                <TouchableOpacity style={styles.profileImageEditButton} onPress={pickNewProfilePicture}>
-                  <Ionicons name="camera" size={24} color="white" />
-                </TouchableOpacity>
+    <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.profileBackgroundImage}>
+      <ScrollView contentContainerStyle={commonStyles.scrollContent}>
+        {userData ? (
+          <>
+            <Text style={commonStyles.title}>
+              {editing ? 'Edit Profile' : `${userData.firstname} ${userData.lastname}`}
+            </Text>
+            <View style={styles.imageContainer}>
+              {profilePicture && !editing && <Image source={{ uri: profilePicture }} style={styles.profileImage} />}
+              {editing && (
+                <ImagePickerComponent initialImage={profilePicture} onImagePicked={setProfilePicture} buttonText="Change Profile Picture" />
               )}
-            </ImageBackground>
-            {isEditing ? (
+            </View>
+            {editing ? (
               <>
-                <View style={styles.detailRow}>
-                  <Text style={styles.label}>First Name:</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={updatedDetails.firstname}
-                    onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, firstname: text })}
-                  />
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.label}>Last Name:</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={updatedDetails.lastname}
-                    onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, lastname: text })}
-                  />
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.label}>Email:</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={updatedDetails.email}
-                    onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, email: text })}
-                  />
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.label}>Mobile Number:</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={updatedDetails.mobilenumber}
-                    onChangeText={(text) => setUpdatedDetails({ ...updatedDetails, mobilenumber: text })}
-                  />
-                </View>
-                <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                  <Text style={styles.buttonText}>Save</Text>
+                <TextInput
+                  style={commonStyles.input}
+                  placeholder="First Name"
+                  value={userData.firstname}
+                  onChangeText={(text) => setUserData({ ...userData, firstname: text })}
+                />
+                <TextInput
+                  style={commonStyles.input}
+                  placeholder="Last Name"
+                  value={userData.lastname}
+                  onChangeText={(text) => setUserData({ ...userData, lastname: text })}
+                />
+                <TextInput
+                  style={commonStyles.input}
+                  placeholder="Email"
+                  value={userData.email}
+                  onChangeText={(text) => setUserData({ ...userData, email: text })}
+                />
+                <TextInput
+                  style={commonStyles.input}
+                  placeholder="Mobile Number"
+                  value={userData.mobilenumber}
+                  onChangeText={(text) => setUserData({ ...userData, mobilenumber: text })}
+                />
+                <TouchableOpacity style={commonStyles.button} onPress={handleUpdate}>
+                  <Text style={commonStyles.buttonText}>Save Changes</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.cancelButton} onPress={() => setIsEditing(false)}>
-                  <Text style={styles.buttonText}>Cancel</Text>
+                <TouchableOpacity style={commonStyles.button} onPress={() => setEditing(false)}>
+                  <Text style={commonStyles.buttonText}>Cancel</Text>
                 </TouchableOpacity>
               </>
             ) : (
               <>
-                <View style={styles.detailRow}>
-                  <Text style={styles.label}>First Name:</Text>
-                  <Text style={styles.value}>{userDetails.firstname}</Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.label}>Last Name:</Text>
-                  <Text style={styles.value}>{userDetails.lastname}</Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.label}>Email:</Text>
-                  <Text style={styles.value}>{userDetails.email}</Text>
-                </View>
-                <View style={styles.detailRow}>
-                  <Text style={styles.label}>Mobile Number:</Text>
-                  <Text style={styles.value}>{userDetails.mobilenumber}</Text>
-                </View>
-                <TouchableOpacity style={styles.editButton} onPress={() => setIsEditing(true)}>
-                  <Text style={styles.buttonText}>Edit Profile</Text>
+                <Text style={styles.label}>First Name: {userData.firstname}</Text>
+                <Text style={styles.label}>Last Name: {userData.lastname}</Text>
+                <Text style={styles.label}>Email: {userData.email}</Text>
+                <Text style={styles.label}>Mobile Number: {userData.mobilenumber}</Text>
+                <TouchableOpacity style={commonStyles.button} onPress={() => setEditing(true)}>
+                  <Text style={commonStyles.buttonText}>Edit Profile</Text>
                 </TouchableOpacity>
               </>
             )}
-            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-              <Text style={styles.buttonText}>Logout</Text>
+            <TouchableOpacity style={commonStyles.button} onPress={handleLogout}>
+              <Text style={commonStyles.buttonText}>Logout</Text>
             </TouchableOpacity>
-          </View>
+          </>
         ) : (
-          <Text style={styles.errorText}>No user details found.</Text>
+          <Text>Loading...</Text>
         )}
       </ScrollView>
       <BottomNavigationBar navigation={navigation} />
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f0f0f0',
-  },
-  loaderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  profileContainer: {
-    alignItems: 'center',
-    paddingTop: 20,
-  },
-  profileImageBackground: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    overflow: 'hidden',
-    marginBottom: 20,
-  },
-  profileImageBackgroundImage: {
-    resizeMode: 'cover',
-  },
-  profileImageEditButton: {
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    padding: 5,
-    borderRadius: 15,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-    width: '90%',
-  },
   label: {
     fontSize: 18,
-    fontWeight: 'bold',
-    marginRight: 10,
-    width: 120,
-  },
-  value: {
-    fontSize: 18,
-    color: '#888',
-    flex: 1,
-  },
-  input: {
-    fontSize: 18,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 5,
-    borderRadius: 5,
-    flex: 1,
-  },
-  button: {
-    backgroundColor: 'blue',
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 10,
-    width: '90%',
-    alignItems: 'center',
-  },
-  saveButton: {
-    backgroundColor: 'blue',
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 10,
-    width: '90%',
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: 'gray',
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 10,
-    width: '90%',
-    alignItems: 'center',
-  },
-  editButton: {
-    backgroundColor: 'blue',
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 10,
-    width: '90%',
-    alignItems: 'center',
-  },
-  logoutButton: {
-    backgroundColor: 'red',
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 20,
-    width: '90%',
-    alignItems: 'center',
-  },
-  buttonText: {
     color: 'white',
-    fontSize: 16,
+    marginBottom: 10,
   },
-  errorText: {
-    fontSize: 18,
-    color: 'red',
-    textAlign: 'center',
-  },
-  scrollViewContent: {
-    flexGrow: 1,
+  imageContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 20,
+    marginBottom: 20,
+  },
+  profileImage: {
+    width: 150, // Increased size
+    height: 150, // Increased size
+    borderRadius: 75, // Adjust border radius for a round image
+    marginTop: 10,
+    marginBottom: 10,
   },
 });
 

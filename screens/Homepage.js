@@ -10,7 +10,8 @@ import axios from 'axios';
 import * as Location from 'expo-location';
 import { OPENWEATHERMAP_API_KEY } from '@env';
 
-const sportOptions = ['All Events', 'Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball'];
+
+const sportOptions = ['All Events', 'Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball', 'Events on Selected Date'];
 
 const Homepage = ({ navigation }) => {
   const [events, setEvents] = useState([]);
@@ -84,7 +85,7 @@ const Homepage = ({ navigation }) => {
       let location = await Location.getCurrentPositionAsync({});
       console.log('Location:', location);
       const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${location.coords.latitude}&lon=${location.coords.longitude}&appid=${process.env.OPENWEATHERMAP_API_KEY}`
+        `https://api.openweathermap.org/data/2.5/weather?lat=${location.coords.latitude}&lon=${location.coords.longitude}&appid=${OPENWEATHERMAP_API_KEY}`
       );
       console.log('API Response:', response.data);
       setWeatherData(response.data);
@@ -108,11 +109,19 @@ const Homepage = ({ navigation }) => {
 
   const filterEvents = () => {
     let filtered = events;
-    if (selectedSport && selectedSport !== 'All Events') {
-      filtered = filtered.filter(event => event.sportType.toLowerCase() === selectedSport.toLowerCase());
-    }
-    if (selectedDate && selectedSport !== 'All Events') {
-      filtered = filtered.filter(event => new Date(event.date).toDateString() === new Date(selectedDate).toDateString());
+    if (selectedSport === 'Events on Selected Date') {
+      if (selectedDate) {
+        filtered = filtered.filter(event => new Date(event.date).toDateString() === new Date(selectedDate).toDateString());
+      } else {
+        filtered = [];
+      }
+    } else {
+      if (selectedSport && selectedSport !== 'All Events') {
+        filtered = filtered.filter(event => event.sportType.toLowerCase() === selectedSport.toLowerCase());
+      }
+      if (selectedDate && selectedSport !== 'All Events') {
+        filtered = filtered.filter(event => new Date(event.date).toDateString() === new Date(selectedDate).toDateString());
+      }
     }
     setFilteredEvents(filtered);
   };
@@ -175,8 +184,8 @@ const Homepage = ({ navigation }) => {
                 ]}
                 onPress={() => {
                   setSelectedSport(option);
-                  if (option === 'All Events') {
-                    setSelectedDate(null); // Reset date when "All Events" is selected
+                  if (option === 'All Events' || option === 'Events on Selected Date') {          
+                       setSelectedDate(null); // Reset date when "All Events" or "Events on Selected Date" is selected
                   }
                 }}              >
                 <Text style={styles.sportFilterButtonText}>{option}</Text>
