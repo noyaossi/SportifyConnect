@@ -8,7 +8,7 @@ import * as ImagePicker from 'expo-image-picker'; // Import ImagePicker
 import { uploadImageToStorage } from '../firebase/storage'; // Import uploadImageToStorage function
 import commonStyles from '../styles/styles'; // Import common styles
 import { Ionicons } from '@expo/vector-icons'; // Import Ionicons
-
+import db, {setupDatabase} from '../services/DatabaseService';
 
 
 
@@ -21,6 +21,7 @@ const Profile = ({ navigation }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
+    setupDatabase(); //Initialize the SQLite db
     fetchUserDetails();
   }, []);
 

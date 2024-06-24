@@ -8,23 +8,22 @@ export const setupDatabase = async () => {
   }
 
   await db.execAsync([{
-    sql: `CREATE TABLE IF NOT EXISTS photos (
+    sql: `CREATE TABLE IF NOT EXISTS profile (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             uri TEXT NOT NULL,
-            description TEXT
           );`,
     args: []
   }]);
 };
 
-export const insertPhoto = async (uri, description) => {
+export const insertPhoto = async (uri) => {
   if (!db) {
     db = await SQLite.openDatabaseAsync('Cache.db');
   }
 
   return db.execAsync([{
-    sql: 'INSERT INTO photos (uri, description) VALUES (?, ?);',
-    args: [uri, description]
+    sql: 'INSERT INTO profile (uri) VALUES (?);',
+    args: [uri]
   }]);
 };
 
@@ -34,7 +33,7 @@ export const getPhotos = async () => {
   }
 
   const result = await db.execAsync([{
-    sql: 'SELECT * FROM photos;',
+    sql: 'SELECT * FROM profile;',
     args: []
   }]);
 
