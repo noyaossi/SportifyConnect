@@ -20,7 +20,6 @@ const BottomNavigationBar = () => {
       <TouchableOpacity onPress={() => handleNavigate('Homepage')}>
         <Image source={require('../assets/images/home.jpg')} style={styles.icon} />
       </TouchableOpacity>
-     
       <TouchableOpacity onPress={() => handleNavigate('Events')}>
         <Image source={require('../assets/images/events.png')} style={styles.icon} />
       </TouchableOpacity>

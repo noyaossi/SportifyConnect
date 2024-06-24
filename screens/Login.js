@@ -1,8 +1,10 @@
 // screens/Login.js
 
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, ImageBackground, StyleSheet, TouchableOpacity } from 'react-native';
 import { loginUser } from '../firebase/auth';
+import commonStyles from '../styles/styles'; // Import common styles
+
 import loginStyle from '../styles/login';
 
 const Login = ({ navigation }) => {
@@ -25,31 +27,34 @@ const Login = ({ navigation }) => {
   };
 
   return (
-    //{ flex: 1, alignItems: 'center', justifyContent: 'center' }
-    <View style={loginStyle.container}>
-     
-      <TextInput
+    <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.backgroundImage}>
+      <View style={commonStyles.container}>
+        <TextInput
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
-        //{ borderWidth: 1, width: 200, marginVertical: 10, padding: 5 }
-        style={{ borderWidth: 1, width: 200, marginVertical: 10, padding: 5 }}
+        keyboardType="email-address"
+        style={commonStyles.input}
+        placeholderTextColor="#aaa" // Optional: Change placeholder text color
+
       />
       <TextInput
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        style={{ borderWidth: 1, width: 200, marginVertical: 10, padding: 5 }}
+        style={commonStyles.input}
+        placeholderTextColor="#aaa" // Optional: Change placeholder text color
       />
-      <TouchableOpacity style={loginStyle.button} onPress={handleLogin}>
-        <Text style={loginStyle.buttonText}>Login</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={loginStyle.button} onPress={handleRegister}>
-        <Text style={loginStyle.buttonText}>Don't have an account? Register</Text>
-      </TouchableOpacity>
-      {error ? <Text style={{ color: 'red' }}>{"Error Loging In"}</Text> : null}
+      <TouchableOpacity style={commonStyles.button} onPress={handleLogin}>
+          <Text style={commonStyles.buttonText}>Login</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={commonStyles.button} onPress={handleRegister}>
+          <Text style={commonStyles.buttonText}>Don't have an account? Register</Text>
+        </TouchableOpacity>
+      {error ? <Text style={commonStyles.errorText}>{error}</Text> : null}
     </View>
+    </ImageBackground>
   );
 };
 

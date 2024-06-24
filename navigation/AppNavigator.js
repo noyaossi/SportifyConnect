@@ -8,18 +8,21 @@ import CreateEvent from '../screens/CreateEvent';
 import Profile from '../screens/Profile';
 import Login from '../screens/Login';
 import Register from '../screens/Register';
+import EditEvent from '../screens/EditEvent';
+
 
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator >
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Register" component={Register} />
       <Stack.Screen name="Homepage" component={Homepage} />
       <Stack.Screen name="Events" component={Events} />
       <Stack.Screen name="CreateEvent" component={CreateEvent} />
       <Stack.Screen name="Profile" component={Profile} />
+      <Stack.Screen name="EditEvent" component={EditEvent} /> 
     </Stack.Navigator>
   );
 };
