@@ -10,7 +10,8 @@ import axios from 'axios';
 import * as Location from 'expo-location';
 import { OPENWEATHERMAP_API_KEY } from '@env';
 
-const sportOptions = ['All Events', 'Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball'];
+
+const sportOptions = ['All Events', 'Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball', 'Events on Selected Date'];
 
 const Homepage = ({ navigation }) => {
   const [events, setEvents] = useState([]);
@@ -122,11 +123,19 @@ const Homepage = ({ navigation }) => {
     
   const filterEvents = () => {
     let filtered = events;
-    if (selectedSport && selectedSport !== 'All Events') {
-      filtered = filtered.filter(event => event.sportType.toLowerCase() === selectedSport.toLowerCase());
-    }
-    if (selectedDate && selectedSport !== 'All Events') {
-      filtered = filtered.filter(event => new Date(event.date).toDateString() === new Date(selectedDate).toDateString());
+    if (selectedSport === 'Events on Selected Date') {
+      if (selectedDate) {
+        filtered = filtered.filter(event => new Date(event.date).toDateString() === new Date(selectedDate).toDateString());
+      } else {
+        filtered = [];
+      }
+    } else {
+      if (selectedSport && selectedSport !== 'All Events') {
+        filtered = filtered.filter(event => event.sportType.toLowerCase() === selectedSport.toLowerCase());
+      }
+      if (selectedDate && selectedSport !== 'All Events') {
+        filtered = filtered.filter(event => new Date(event.date).toDateString() === new Date(selectedDate).toDateString());
+      }
     }
 
     //TODO: add to filter by date
@@ -191,8 +200,8 @@ const Homepage = ({ navigation }) => {
                 ]}
                 onPress={() => {
                   setSelectedSport(option);
-                  if (option === 'All Events') {
-                    setSelectedDate(null); // Reset date when "All Events" is selected
+                  if (option === 'All Events' || option === 'Events on Selected Date') {          
+                       setSelectedDate(null); // Reset date when "All Events" or "Events on Selected Date" is selected
                   }
                 }}              >
                 <Text style={styles.sportFilterButtonText}>{option}</Text>

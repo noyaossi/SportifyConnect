@@ -66,4 +66,14 @@ export default StyleSheet.create({
     textAlign: 'center',
     color: 'white', // Adjust color as needed
   },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 100,
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Optional: Add a semi-transparent overlay
+
+  },
 });
+

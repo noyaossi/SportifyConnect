@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { onAuthStateChanged, getAuth } from 'firebase/auth';
+import { onAuthStateChanged, getAuth, signOut } from 'firebase/auth';
 import { initializeApp, getApps } from 'firebase/app';
 import firebaseConfig from '../firebase/firebaseConfig';
 
@@ -28,9 +28,17 @@ export const AuthProvider = ({ children }) => {
     return unsubscribe;
   }, []);
 
+  const logout = async () => {
+    const auth = getAuth();
+    await signOut(auth);
+  };
+
   const value = {
     currentUser,
+    logout,
   };
+
+  
 
   return (
     <AuthContext.Provider value={value}>

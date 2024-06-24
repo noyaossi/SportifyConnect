@@ -1,7 +1,7 @@
 // screens/Login.js
 
 import React, { useState } from 'react';
-import { View, Text, TextInput, ImageBackground, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, ImageBackground, StyleSheet, TouchableOpacity, ScrollView  } from 'react-native';
 import { loginUser } from '../firebase/auth';
 import commonStyles from '../styles/styles'; // Import common styles
 
@@ -28,8 +28,8 @@ const Login = ({ navigation }) => {
 
   return (
     <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.backgroundImage}>
-      <View style={commonStyles.container}>
-        <TextInput
+      <ScrollView contentContainerStyle={commonStyles.scrollContent}>
+      <TextInput
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
@@ -53,7 +53,7 @@ const Login = ({ navigation }) => {
           <Text style={commonStyles.buttonText}>Don't have an account? Register</Text>
         </TouchableOpacity>
       {error ? <Text style={commonStyles.errorText}>{error}</Text> : null}
-    </View>
+      </ScrollView>
     </ImageBackground>
   );
 };

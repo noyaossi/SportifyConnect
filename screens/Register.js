@@ -1,12 +1,11 @@
 // screens/Register.js
 
-import React, { useState, useEffect  } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, TouchableOpacity, Image, ImageBackground    } from 'react-native';
+import React, { useState } from 'react';
+import { ScrollView, Text, TextInput, Alert, TouchableOpacity, ImageBackground } from 'react-native';
 import { registerUser } from '../firebase/auth'; // Import registerUser from firebase/auth
-import { addUser, updateUser  } from '../firebase/firestore'; // Import addUser from firebase/firestore
-import * as ImagePicker from 'expo-image-picker';
-import { uploadImageToStorage } from '../firebase/storage'; // Import the uploadImageToStorage function
+import { addUser } from '../firebase/firestore'; // Import addUser from firebase/firestore
 import commonStyles from '../styles/styles'; // Import common styles
+import ImagePickerComponent from '../components/ImagePickerComponent'; // Import ImagePickerComponent
 
 
 
@@ -19,15 +18,6 @@ const Register = ({ navigation }) => {
   const [profilepicture, setProfilePicture] = useState('');
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        alert('Sorry, we need camera roll permissions to make this work!');
-      }
-    })();
-  }, []);
-
 
   const handleRegister = async () => {
     try {
@@ -36,9 +26,7 @@ const Register = ({ navigation }) => {
       let profilePictureUrl = '';
 
       if (profilepicture) {
-        //console.log('Uploading profile picture...');
         profilePictureUrl = await uploadImageToStorage(profilepicture);
-        //console.log('Profile picture URL:', profilePictureUrl);
       }
 
       const userDetails = {
@@ -49,7 +37,6 @@ const Register = ({ navigation }) => {
         profilepicture: profilePictureUrl,
       };
 
-      //console.log('User details to save:', userDetails);
       await addUser(user.uid, userDetails);
       Alert.alert('Registration Successful', `Welcome ${user.email}`);
       navigation.navigate('Login');
@@ -60,22 +47,10 @@ const Register = ({ navigation }) => {
     }
   };
 
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-    if (!result.canceled) {
-      console.log('Image picked:', result.assets[0].uri);
-      setProfilePicture(result.assets[0].uri);
-    }
-  };
 
   return (
     <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.backgroundImage}>
-    <View style={commonStyles.container}>
+      <ScrollView contentContainerStyle={commonStyles.scrollContent}>
       <Text style={commonStyles.title}>Register</Text>
       <TextInput
         style={commonStyles.input}
@@ -113,20 +88,15 @@ const Register = ({ navigation }) => {
         secureTextEntry
         autoCapitalize="none"
       />
-      <TouchableOpacity style={commonStyles.button} onPress={pickImage}>
-          <Text style={commonStyles.buttonText}>Choose Profile Picture</Text>
-        </TouchableOpacity>
-      {profilepicture ? (
-        <Image source={{ uri: profilepicture }} style={commonStyles.profileImage} />
-      ) : null}
+      <ImagePickerComponent initialImage={profilepicture} onImagePicked={setProfilePicture} buttonText="Choose Profile Picture" />
       <TouchableOpacity style={commonStyles.button} onPress={handleRegister}>
           <Text style={commonStyles.buttonText}>Register</Text>
         </TouchableOpacity>
         <TouchableOpacity style={commonStyles.button} onPress={() => navigation.navigate('Login')}>
           <Text style={commonStyles.buttonText}>Already have an account? Login</Text>
         </TouchableOpacity>
-    </View>
-    </ImageBackground>
+        </ScrollView>
+        </ImageBackground>
   );
 };
 export default Register;
