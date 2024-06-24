@@ -13,8 +13,6 @@ import { Ionicons } from '@expo/vector-icons'; // Import Ionicons
 
 
 const Profile = ({ navigation }) => {
-  {/* Include the bottom navigation bar */}
-  <BottomNavigationBar navigation={navigation} />
   const [userDetails, setUserDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -52,15 +50,26 @@ const Profile = ({ navigation }) => {
 
 // Function to handle the selection of a new profile picture
 const pickNewProfilePicture = async () => {
-  let result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    allowsEditing: true,
-    aspect: [4, 3],
-    quality: 1,
-  });
-  if (!result.canceled) {
-    console.log('New profile picture picked:', result.assets[0].uri);
-    setNewProfilePicture(result.assets[0].uri);
+  try {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Sorry, we need camera roll permissions to make this work!');
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      console.log('New profile picture picked:', result.assets[0].uri);
+      setNewProfilePicture(result.assets[0].uri);
+    }
+  } catch (error) {
+    console.error('Error accessing gallery:', error);
   }
 };
 
@@ -117,18 +126,19 @@ const handleRefresh = () => {
   }
 
   return (
-
     <View style={styles.container}>
-    <ScrollView
+      <ScrollView
         contentContainerStyle={styles.scrollViewContent}
         refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
       >
-      {userDetails ? (
+        {userDetails ? (
           <View style={styles.profileContainer}>
             <ImageBackground source={{ uri: userDetails.profilepicture || 'https://via.placeholder.com/150' }} style={styles.profileImageBackground} imageStyle={styles.profileImageBackgroundImage}>
-              <TouchableOpacity style={styles.profileImageEditButton} onPress={pickNewProfilePicture}>
-                <Ionicons name="camera" size={24} color="white" />
-              </TouchableOpacity>
+              {isEditing && (
+                <TouchableOpacity style={styles.profileImageEditButton} onPress={pickNewProfilePicture}>
+                  <Ionicons name="camera" size={24} color="white" />
+                </TouchableOpacity>
+              )}
             </ImageBackground>
             {isEditing ? (
               <>
@@ -204,7 +214,6 @@ const handleRefresh = () => {
       </ScrollView>
       <BottomNavigationBar navigation={navigation} />
     </View>
-
   );
 };
 

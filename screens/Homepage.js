@@ -8,6 +8,7 @@ import { useRefresh } from '../contexts/RefreshContext';
 import { Calendar } from 'react-native-calendars';
 import axios from 'axios';
 import * as Location from 'expo-location';
+import { OPENWEATHERMAP_API_KEY } from '@env';
 
 const sportOptions = ['All Events', 'Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball'];
 
@@ -83,7 +84,7 @@ const Homepage = ({ navigation }) => {
       let location = await Location.getCurrentPositionAsync({});
       console.log('Location:', location);
       const response = await axios.get(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${location.coords.latitude}&lon=${location.coords.longitude}&appid=5f435da82d04bcec261dc93d63e64de6`
+        `https://api.openweathermap.org/data/2.5/weather?lat=${location.coords.latitude}&lon=${location.coords.longitude}&appid=${process.env.OPENWEATHERMAP_API_KEY}`
       );
       console.log('API Response:', response.data);
       setWeatherData(response.data);
