@@ -15,6 +15,7 @@ const EditEvent = ({ navigation, route }) => {
     const fetchEvent = async () => {
       try {
         const event = await getEvent(eventId);
+ 
         event.participants = event.participants.toString(); // Ensure participants is a string for TextInput
         setInitialData(event);
       } catch (error) {

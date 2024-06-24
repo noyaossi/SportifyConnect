@@ -6,11 +6,28 @@ import ImagePickerComponent from '../components/ImagePickerComponent';
 
 
 const EventForm = ({ onSubmit, initialData = {} }) => {
+  
+
   const [eventName, setEventName] = useState(initialData.eventName || '');
   const [sportType, setSportType] = useState(initialData.sportType || '');
   const [location, setLocation] = useState(initialData.location || '');
   const [date, setDate] = useState(initialData.date ? new Date(initialData.date) : new Date());
-  const [time, setTime] = useState(initialData.time ? new Date(`1970-01-01T${initialData.time}Z`) : new Date());
+
+  function createDateFromTimeString(timeString) {
+    const [hours, minutes, seconds] = timeString.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours);
+    date.setMinutes(minutes);
+    date.setSeconds(seconds);
+    return date;
+  }
+  
+  // Usage example:
+  const specificTime = createDateFromTimeString(initialData.time);
+  const [time, setTime] = useState(specificTime);
+  console.log(specificTime);  // Output: Wed Jun 27 2024 14:45:30 GMT+0000 (Coordinated Universal Time)
+  
+  //const [time, setTime] = useState(initialData.time ? new Date(`1970-01-01T${initialData.time}Z`) : new Date());
   const [participants, setParticipants] = useState(String(initialData.participants || ''));
   const [description, setDescription] = useState(initialData.description || '');
   const [picture, setPicture] = useState(initialData.picture || null);
@@ -23,6 +40,7 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
     if (initialData.participants !== undefined) {
       setParticipants(String(initialData.participants));
     }
+  
   }, [initialData.participants]);
 
 
@@ -99,7 +117,7 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
         />
       )}
       <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.dateInput}>
-        <Text style={styles.dateText}>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+        <Text style={styles.dateText}>{time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</Text>
       </TouchableOpacity>
       {showTimePicker && (
         <DateTimePicker
