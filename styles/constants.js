@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native';
 import { colors } from './colors';
 
-export const globalStyles = StyleSheet.create({
+const globalStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -17,10 +17,14 @@ export const globalStyles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
+    marginVertical: 10,
   },
   buttonText: {
     color: colors.light,
     fontSize: 18,
     fontWeight: 'bold',
+    marginVertical: 10,
   },
 });
+
+export default globalStyles;

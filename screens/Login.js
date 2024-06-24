@@ -5,6 +5,7 @@ import { View, Text, TextInput, ImageBackground, StyleSheet, TouchableOpacity, S
 import { loginUser } from '../firebase/auth';
 import commonStyles from '../styles/styles'; // Import common styles
 
+import loginStyle from '../styles/login';
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');

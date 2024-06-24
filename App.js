@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { ActivityIndicator, View } from 'react-native';
+import { useFonts } from 'expo-font';
 import { getApps, initializeApp } from 'firebase/app';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 import firebaseConfig from './firebase/firebaseConfig';
@@ -43,6 +44,7 @@ function App() {
     initializeAuth();
   }, []);
 
+  
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -50,6 +52,7 @@ function App() {
       </View>
     );
   }
+
 
   return (
     <AuthProvider>
