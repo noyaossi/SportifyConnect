@@ -1,37 +1,37 @@
-// screens/CreateEvent.js
-import React from 'react';
-import EventForm from '../components/EventForm';
+import React, { useState } from 'react';
+import { Alert, View } from 'react-native';
+import { useAuth } from '../contexts/AuthContext';
 import { addEvent, createNewEvent } from '../firebase/firestore';
-import { uploadImage } from '../firebase/storage';
-import { useAuth } from '../contexts/AuthContext'; 
-import { Alert } from 'react-native';
+import commonStyles from '../styles/styles';
+import ScreenContainer from '../components/ScreenContainer';
+import EventForm from '../components/EventForm';
 
 const CreateEvent = ({ navigation }) => {
-  const { currentUser } = useAuth(); 
+  const { currentUser } = useAuth();
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (newEvent) => {
+  const handleCreateEvent = async (event) => {
+    setLoading(true);
     try {
-      let pictureUrl = null;
-      if (newEvent.picture) {
-        pictureUrl = await uploadImage(newEvent.picture);
-      }
-
-      const eventToSubmit = {
-        ...newEvent,
-        picture: pictureUrl,
-      };
-
-      const eventId = await addEvent(eventToSubmit);
+      const eventId = await addEvent(event);
       await createNewEvent(currentUser.uid, eventId);
-
       Alert.alert('Event Created', 'Your event has been created successfully.');
       navigation.navigate('Events');
     } catch (error) {
       console.error('Error creating event:', error);
+      Alert.alert('Error', 'Failed to create event. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  return <EventForm onSubmit={handleSubmit} />;
+  return (
+      <View style={{ flex: 1 }}>
+        <ScreenContainer loading={loading} onRefresh={() => {}}>
+          <EventForm onSubmit={handleCreateEvent} />
+        </ScreenContainer>
+      </View>
+  );
 };
 
 export default CreateEvent;

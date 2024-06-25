@@ -1,9 +1,8 @@
-// components/EventForm.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Image, Alert, ScrollView, TouchableOpacity } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import ImagePickerComponent from '../components/ImagePickerComponent';
-
+import * as ImagePicker from 'expo-image-picker';
+import commonStyles from '../styles/styles';
 
 const EventForm = ({ onSubmit, initialData = {} }) => {
   const [eventName, setEventName] = useState(initialData.eventName || '');
@@ -25,6 +24,18 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
     }
   }, [initialData.participants]);
 
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setPicture(result.assets[0].uri);
+    }
+  };
 
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -39,10 +50,6 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
   };
 
   const handleSubmit = () => {
-    if (!eventName || !sportType || !location || !date || !time || !participants || !description || !picture) {
-      Alert.alert('Error', 'All fields are required.');
-      return;
-    }
     const formattedDate = date.toISOString().split('T')[0];
     const formattedTime = time.toTimeString().split(' ')[0];
     const eventToSubmit = {
@@ -56,100 +63,92 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
       picture,
     };
 
+    if (!eventName || !sportType || !location || !date || !time || !participants || !description || !picture) {
+      Alert.alert('Error', 'All fields are required.');
+      return;
+    }
+
     onSubmit(eventToSubmit);
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContent}>
-      <Text style={styles.header}>Event Form:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Event Name"
-        value={eventName}
-        onChangeText={setEventName}
-      />
-      <Text style={styles.label}>Sport Type</Text>
-      <View style={styles.pickerContainer}>
-        {sportOptions.map((option) => (
-          <TouchableOpacity
-            key={option}
-            style={styles.pickerItem}
-            onPress={() => setSportType(option)}
-          >
-            <Text style={styles.pickerItemText}>{option}</Text>
+      <ScrollView contentContainerStyle={commonStyles.scrollContent}>
+        <Text style={commonStyles.title}>Event Form:</Text>
+        <TextInput
+          style={commonStyles.input}
+          placeholder="Event Name"
+          value={eventName}
+          onChangeText={setEventName}
+        />
+        <Text style={commonStyles.label}>Sport Type</Text>
+        <View style={styles.pickerContainer}>
+          {sportOptions.map((option) => (
+            <TouchableOpacity
+              key={option}
+              style={styles.pickerItem}
+              onPress={() => setSportType(option)}
+            >
+              <Text style={styles.pickerItemText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <Text style={styles.selectedSportType}>{sportType}</Text>
+        <TextInput
+          style={commonStyles.input}
+          placeholder="Location"
+          value={location}
+          onChangeText={setLocation}
+        />
+        <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateInput}>
+          <Text style={styles.dateText}>{date.toDateString()}</Text>
+        </TouchableOpacity>
+        {showDatePicker && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            display="default"
+            onChange={handleDateChange}
+          />
+        )}
+        <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.dateInput}>
+          <Text style={styles.dateText}>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+        </TouchableOpacity>
+        {showTimePicker && (
+          <DateTimePicker
+            value={time}
+            mode="time"
+            display="default"
+            onChange={handleTimeChange}
+          />
+        )}
+        <TextInput
+          style={commonStyles.input}
+          placeholder="Number Of Participants"
+          keyboardType="number-pad"
+          value={participants}
+          onChangeText={setParticipants}
+        />
+        <TextInput
+          style={commonStyles.input}
+          placeholder="Event Description"
+          value={description}
+          onChangeText={setDescription}
+        />
+        <View style={styles.uploadPictureContainer}>
+          {picture && <Image source={{ uri: picture }} style={commonStyles.profileImage} />}
+          <TouchableOpacity style={commonStyles.button} onPress={pickImage}>
+            <Text style={commonStyles.buttonText}>Choose from Gallery</Text>
           </TouchableOpacity>
-        ))}
-      </View>
-      <Text style={styles.selectedSportType}>{sportType}</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Location"
-        value={location}
-        onChangeText={setLocation}
-      />
-      <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateInput}>
-        <Text style={styles.dateText}>{date.toDateString()}</Text>
-      </TouchableOpacity>
-      {showDatePicker && (
-        <DateTimePicker
-          value={date}
-          mode="date"
-          display="default"
-          onChange={handleDateChange}
-        />
-      )}
-      <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.dateInput}>
-        <Text style={styles.dateText}>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
-      </TouchableOpacity>
-      {showTimePicker && (
-        <DateTimePicker
-          value={time}
-          mode="time"
-          display="default"
-          onChange={handleTimeChange}
-        />
-      )}
-      <TextInput
-        style={styles.input}
-        placeholder="Number Of Participants"
-        keyboardType="number-pad"
-        value={participants}
-        onChangeText={setParticipants}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Event Description"
-        value={description}
-        onChangeText={setDescription}
-      />
-            <ImagePickerComponent initialImage={picture} onImagePicked={setPicture}  buttonText="Choose from Gallery" />
-      <Button title="Submit" onPress={handleSubmit} />
-    </ScrollView>
+        </View>
+        <TouchableOpacity style={commonStyles.button} onPress={handleSubmit}>
+          <Text style={commonStyles.buttonText}>Submit</Text>
+        </TouchableOpacity>
+      </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 100,
-  },
-  header: {
-    fontSize: 24,
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 12,
-    padding: 8,
-    borderRadius: 5,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 8,
-  },
+  
   pickerContainer: {
     borderColor: 'gray',
     borderWidth: 1,
@@ -181,10 +180,7 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 16,
   },
-  image: {
-    width: '100%',
-    height: 200,
-    resizeMode: 'cover',
+  uploadPictureContainer: {
     marginBottom: 12,
   },
 });

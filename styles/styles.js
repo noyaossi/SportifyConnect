@@ -1,4 +1,3 @@
-// styles.js
 import { StyleSheet, Dimensions } from 'react-native';
 
 const { height } = Dimensions.get('window');
@@ -10,16 +9,15 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
   profileBackgroundImage: {
-    flex: 2,
+    flex: 1,
     resizeMode: 'cover',
     justifyContent: 'center',
-    //alignItems: 'center',
   },
   container: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Optional: Add a semi-transparent overlay
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Darker background
     padding: 20,
     height: height,
   },
@@ -30,11 +28,11 @@ export default StyleSheet.create({
     marginVertical: 10,
     padding: 10,
     borderRadius: 5,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Optional: Add a background color for input fields
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     fontSize: 18,
   },
   button: {
-    backgroundColor: '#304462', 
+    backgroundColor: '#304462',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
@@ -42,11 +40,9 @@ export default StyleSheet.create({
     width: '80%',
     alignItems: 'center',
   },
-
   buttonText: {
     color: 'white',
     fontSize: 15,
-    //fontWeight: 'bold',
   },
   errorText: {
     color: 'red',
@@ -54,9 +50,9 @@ export default StyleSheet.create({
     marginTop: 20,
   },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
     marginTop: 10,
     marginBottom: 10,
   },
@@ -64,16 +60,14 @@ export default StyleSheet.create({
     fontSize: 24,
     marginBottom: 16,
     textAlign: 'center',
-    color: 'white', // Adjust color as needed
+    color: 'white',
   },
   scrollContent: {
-    padding: 20,
-    paddingBottom: 100,
+   
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Optional: Add a semi-transparent overlay
-
+    paddingBottom: 60,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Darker background
   },
 });
-

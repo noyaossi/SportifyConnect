@@ -1,28 +1,33 @@
+// screens/Profile.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, Alert, ScrollView, ImageBackground } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { getUser, updateUser } from '../firebase/firestore';
 import ImagePickerComponent from '../components/ImagePickerComponent';
-import BottomNavigationBar from '../components/BottomNavigationBar'; // Import BottomNavigationBar
 import commonStyles from '../styles/styles';
+import ScreenContainer from '../components/ScreenContainer';
 
 const Profile = ({ navigation }) => {
   const { currentUser, logout } = useAuth();
   const [userData, setUserData] = useState(null);
   const [editing, setEditing] = useState(false);
   const [profilePicture, setProfilePicture] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      const data = await getUser(currentUser.uid);
+      setUserData(data);
+      setProfilePicture(data.profilepicture);
+      setLoading(false); // Set loading to false once data is fetched
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const data = await getUser(currentUser.uid);
-        setUserData(data);
-        setProfilePicture(data.profilepicture);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-
     fetchUserData();
   }, [currentUser]);
 
@@ -51,8 +56,8 @@ const Profile = ({ navigation }) => {
   };
 
   return (
-    <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.profileBackgroundImage}>
-      <ScrollView contentContainerStyle={commonStyles.scrollContent}>
+    <ScreenContainer loading={loading} onRefresh={() => fetchUserData} navigation={navigation}>
+      <View style={commonStyles.scrollContent}>
         {userData ? (
           <>
             <Text style={commonStyles.title}>
@@ -60,12 +65,10 @@ const Profile = ({ navigation }) => {
             </Text>
             <View style={styles.imageContainer}>
               {profilePicture && !editing && <Image source={{ uri: profilePicture }} style={styles.profileImage} />}
-              {editing && (
-                <ImagePickerComponent initialImage={profilePicture} onImagePicked={setProfilePicture} buttonText="Change Profile Picture" />
-              )}
             </View>
             {editing ? (
               <>
+                <ImagePickerComponent initialImage={profilePicture} onImagePicked={setProfilePicture} buttonText="Change Profile Picture" />
                 <TextInput
                   style={commonStyles.input}
                   placeholder="First Name"
@@ -115,9 +118,8 @@ const Profile = ({ navigation }) => {
         ) : (
           <Text>Loading...</Text>
         )}
-      </ScrollView>
-      <BottomNavigationBar navigation={navigation} />
-    </ImageBackground>
+      </View>
+    </ScreenContainer>
   );
 };
 
