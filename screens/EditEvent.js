@@ -15,8 +15,10 @@ const EditEvent = ({ route, navigation }) => {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const fetchedEvent = await getEvent(eventId);
-        setEvent(fetchedEvent);
+        const event = await getEvent(eventId);
+ 
+        event.participants = event.participants.toString(); // Ensure participants is a string for TextInput
+        setInitialData(event);
       } catch (error) {
         console.error('Error fetching event:', error);
         Alert.alert('Error', 'Failed to load event details. Please try again.');

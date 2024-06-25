@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { getUser, updateUser } from '../firebase/firestore';
 import ImagePickerComponent from '../components/ImagePickerComponent';
 import commonStyles from '../styles/styles';
-import ScreenContainer from '../components/ScreenContainer';
+import db, {setupDatabase} from '../services/DatabaseService';
 
 const Profile = ({ navigation }) => {
   const { currentUser, logout } = useAuth();
@@ -14,37 +14,52 @@ const Profile = ({ navigation }) => {
   const [profilePicture, setProfilePicture] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const fetchUserData = async () => {
-    try {
-      setLoading(true);
-      const data = await getUser(currentUser.uid);
-      setUserData(data);
-      setProfilePicture(data.profilepicture);
-      setLoading(false); // Set loading to false once data is fetched
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchUserData();
-  }, [currentUser]);
+    fetchUserDetails();
+  }, []);
 
-  const handleUpdate = async () => {
-    try {
-      const updatedUser = {
-        ...userData,
-        profilepicture: profilePicture,
-      };
-      await updateUser(currentUser.uid, updatedUser);
-      Alert.alert('Profile Updated', 'Your profile has been updated successfully.');
-      setEditing(false);
-    } catch (error) {
-      console.error('Error updating user data:', error);
-      Alert.alert('Update Failed', 'Failed to update profile. Please try again.');
+    const fetchUserDetails = async () => {
+      setIsRefreshing(true);
+
+      try {
+        const data = await getUser(currentUser.uid);
+        setUserData(data);
+        setProfilePicture(data.profilepicture);
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      } finally {
+        setIsLoading(false);
+        setIsRefreshing(false);
+
+      }
+    };
+
+
+
+// Function to handle the selection of a new profile picture
+const pickNewProfilePicture = async () => {
+  try {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Sorry, we need camera roll permissions to make this work!');
+      return;
     }
-  };
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      console.log('New profile picture picked:', result.assets[0].uri);
+      setNewProfilePicture(result.assets[0].uri);
+    }
+  } catch (error) {
+    console.error('Error accessing gallery:', error);
+  }
+};
 
   const handleLogout = async () => {
     try {

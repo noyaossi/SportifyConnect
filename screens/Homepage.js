@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image, ActivityIndicator, Button } from 'react-native';
+import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image, ScrollView, RefreshControl, ActivityIndicator  } from 'react-native';
 import { getEvents, registerForEvent } from '../firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import BottomNavigationBar from '../components/BottomNavigationBar';
@@ -9,38 +9,50 @@ import { Calendar } from 'react-native-calendars';
 import axios from 'axios';
 import * as Location from 'expo-location';
 import { OPENWEATHERMAP_API_KEY } from '@env';
-import ScreenContainer from '../components/ScreenContainer';
+
 
 const sportOptions = ['All Events', 'Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball', 'Events on Selected Date'];
 
 const Homepage = ({ navigation }) => {
-  const { currentUser } = useAuth();
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [selectedSport, setSelectedSport] = useState('All Events');
   const [selectedDate, setSelectedDate] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [weatherData, setWeatherData] = useState(null);
   const [loadingWeather, setLoadingWeather] = useState(true);
   const [error, setError] = useState(null);
+  const { currentUser } = useAuth();
   const { refreshing: contextRefreshing } = useRefresh();
 
   const onRefresh = async () => {
-    setLoading(true);
+    setRefreshing(true);
     try {
       const eventsData = await getEvents();
       setEvents(eventsData);
       setFilteredEvents(eventsData);
       await fetchWeatherData();
+
     } catch (error) {
       console.error('Error fetching events or weather data:', error);
     } finally {
-      setLoading(false);
+      setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    onRefresh();
+    const fetchEvents = async () => {
+      try {
+        const eventsData = await getEvents();
+        setEvents(eventsData);
+        setFilteredEvents(eventsData);
+        await fetchWeatherData();
+
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      }
+    };
+    fetchEvents();
   }, [currentUser]);
 
   useEffect(() => {
@@ -48,6 +60,7 @@ const Homepage = ({ navigation }) => {
       onRefresh();
     }
   }, [contextRefreshing]);
+
 
   const handleRegister = async (eventId) => {
     try {
@@ -70,11 +83,13 @@ const Homepage = ({ navigation }) => {
         return;
       }
       let location = await Location.getCurrentPositionAsync({});
+      console.log('Location:', location);
       const response = await axios.get(
         `https://api.openweathermap.org/data/2.5/weather?lat=${location.coords.latitude}&lon=${location.coords.longitude}&appid=${OPENWEATHERMAP_API_KEY}`
       );
+      console.log('API Response:', response.data);
       setWeatherData(response.data);
-      setError(null);
+      setError(null);  // Clear any previous errors
     } catch (error) {
       console.error('Error fetching weather data:', error);
       setError(error.message);
@@ -84,7 +99,7 @@ const Homepage = ({ navigation }) => {
   };
 
   const kelvinToCelsius = (temp) => (temp - 273.15).toFixed(2);
-  const kelvinToFahrenheit = (temp) => ((temp - 273.15) * 9 / 5 + 32).toFixed(2);
+  const kelvinToFahrenheit = (temp) => ((temp - 273.15) * 9/5 + 32).toFixed(2);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -92,17 +107,40 @@ const Homepage = ({ navigation }) => {
     return date.toLocaleDateString('en-US', options);
   };
 
+  const formatTime = (timeString) => {
+    console.log("time in homepage:", timeString);
+    if (!timeString) {
+      return 'Invalid time2';
+    }
+    // Split the time string into parts
+    const [hour, minute] = timeString.split(':');
+    // Check if hour and minute are defined
+    if (hour === undefined || minute === undefined) {
+      return 'Invalid time2';
+    }
+    return hour + ':' + minute;
+  };
+    
   const filterEvents = () => {
     let filtered = events;
-    if (selectedSport && selectedSport !== 'All Events' && selectedSport !== 'Events on Selected Date') {
-      filtered = filtered.filter(event => event.sportType.toLowerCase() === selectedSport.toLowerCase());
+    if (selectedSport === 'Events on Selected Date') {
+      if (selectedDate) {
+        filtered = filtered.filter(event => new Date(event.date).toDateString() === new Date(selectedDate).toDateString());
+      } else {
+        filtered = [];
+      }
+    } else {
+      if (selectedSport && selectedSport !== 'All Events') {
+        filtered = filtered.filter(event => event.sportType.toLowerCase() === selectedSport.toLowerCase());
+      }
+      if (selectedDate && selectedSport !== 'All Events') {
+        filtered = filtered.filter(event => new Date(event.date).toDateString() === new Date(selectedDate).toDateString());
+      }
     }
-    if (selectedDate && selectedSport === 'Events on Selected Date') {
-      filtered = filtered.filter(event => new Date(event.date).toDateString() === new Date(selectedDate).toDateString());
-    }
+
+    //TODO: add to filter by date
     setFilteredEvents(filtered);
   };
-
   useEffect(() => {
     filterEvents();
   }, [selectedSport, selectedDate, events]);
@@ -114,7 +152,7 @@ const Homepage = ({ navigation }) => {
         <Text style={styles.eventDetails}>{item.sportType}</Text>
         <Text style={styles.eventDetails}>{item.location}</Text>
         <Text style={styles.eventDetails}>{formatDate(item.date)}</Text>
-        <Text style={styles.eventDetails}>{item.time}</Text>
+        <Text style={styles.eventDetails}>{formatTime(item.time)}</Text>
         <Text style={styles.eventDetails}>Participants: {item.participants}</Text>
         <Text style={styles.eventDetails}>{item.description}</Text>
       </View>
@@ -124,10 +162,13 @@ const Homepage = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.mainContainer}>
-      <ScreenContainer loading={loading} onRefresh={onRefresh}>
+    <View style={styles.maincontainer}>
+      <ScrollView
+        contentContainerStyle={styles.scrollViewContent}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      > 
         <View style={styles.container}>
-          <Text style={styles.header}>Current Weather:</Text>
+        <Text style={styles.header}>Current Weather:</Text>
           {loadingWeather ? (
             <ActivityIndicator size="large" color="#0000ff" />
           ) : error ? (
@@ -143,7 +184,7 @@ const Homepage = ({ navigation }) => {
           ) : (
             <Text>No weather data available at the moment.</Text>
           )}
-          <Calendar
+        <Calendar
             onDayPress={day => setSelectedDate(day.dateString)}
             markedDates={{
               [selectedDate]: { selected: true, selectedColor: 'blue' }
@@ -157,8 +198,12 @@ const Homepage = ({ navigation }) => {
                   styles.sportFilterButton,
                   selectedSport === option && styles.sportFilterButtonSelected
                 ]}
-                onPress={() => setSelectedSport(option)}
-              >
+                onPress={() => {
+                  setSelectedSport(option);
+                  if (option === 'All Events' || option === 'Events on Selected Date') {          
+                       setSelectedDate(null); // Reset date when "All Events" or "Events on Selected Date" is selected
+                  }
+                }}              >
                 <Text style={styles.sportFilterButtonText}>{option}</Text>
               </TouchableOpacity>
             ))}
@@ -167,18 +212,28 @@ const Homepage = ({ navigation }) => {
           {filteredEvents.length === 0 ? (
             <Text>No events available at the moment.</Text>
           ) : (
-            <FlatList data={filteredEvents} renderItem={renderEventItem} keyExtractor={(item) => item.id} scrollEnabled={false} />
+            <FlatList
+              data={filteredEvents}
+              renderItem={renderEventItem}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+            />
           )}
+         
         </View>
-      </ScreenContainer>
+      </ScrollView>
       <BottomNavigationBar navigation={navigation} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  mainContainer: {
+  maincontainer: {
     flex: 1,
+    backgroundColor: 'white',
+  },
+  scrollViewContent: {
+    paddingBottom: 100,
   },
   container: {
     flex: 1,
@@ -235,6 +290,18 @@ const styles = StyleSheet.create({
   },
   sportFilterButtonText: {
     color: 'black',
+  },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 80,
+    backgroundColor: '#1E90FF',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
   },
   weatherContainer: {
     marginTop: 20,
