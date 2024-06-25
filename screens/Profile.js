@@ -1,9 +1,9 @@
-// screens/Profile.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, Alert, ScrollView, ImageBackground } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { getUser, updateUser } from '../firebase/firestore';
 import ImagePickerComponent from '../components/ImagePickerComponent';
+import BottomNavigationBar from '../components/BottomNavigationBar'; // Import BottomNavigationBar
 import commonStyles from '../styles/styles';
 import db, {setupDatabase} from '../services/DatabaseService';
 
@@ -12,7 +12,8 @@ const Profile = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
   const [editing, setEditing] = useState(false);
   const [profilePicture, setProfilePicture] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     fetchUserDetails();
@@ -34,32 +35,25 @@ const Profile = ({ navigation }) => {
       }
     };
 
+    const handleUpdate = async () => {
+      try {
+        const updatedUser = {
+          ...userData,
+          profilepicture: profilePicture,
+        };
+        await updateUser(currentUser.uid, updatedUser);
+        Alert.alert('Profile Updated', 'Your profile has been updated successfully.');
+        setEditing(false);
+      } catch (error) {
+        console.error('Error updating user data:', error);
+        Alert.alert('Update Failed', 'Failed to update profile. Please try again.');
+      }
+    };
+  
 
 
-// Function to handle the selection of a new profile picture
-const pickNewProfilePicture = async () => {
-  try {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      alert('Sorry, we need camera roll permissions to make this work!');
-      return;
-    }
 
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
 
-    if (!result.canceled) {
-      console.log('New profile picture picked:', result.assets[0].uri);
-      setNewProfilePicture(result.assets[0].uri);
-    }
-  } catch (error) {
-    console.error('Error accessing gallery:', error);
-  }
-};
 
   const handleLogout = async () => {
     try {
@@ -71,19 +65,23 @@ const pickNewProfilePicture = async () => {
   };
 
   return (
-    <ScreenContainer loading={loading} onRefresh={() => fetchUserData} navigation={navigation}>
-      <View style={commonStyles.scrollContent}>
-        {userData ? (
+    <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.profileBackgroundImage}>
+      <ScrollView contentContainerStyle={commonStyles.scrollContent}>
+        {isLoading ? (
+          <Text>Loading...</Text>
+        ) : (
           <>
             <Text style={commonStyles.title}>
               {editing ? 'Edit Profile' : `${userData.firstname} ${userData.lastname}`}
             </Text>
             <View style={styles.imageContainer}>
               {profilePicture && !editing && <Image source={{ uri: profilePicture }} style={styles.profileImage} />}
+              {editing && (
+                <ImagePickerComponent initialImage={profilePicture} onImagePicked={setProfilePicture} buttonText="Change Profile Picture" />
+              )}
             </View>
             {editing ? (
               <>
-                <ImagePickerComponent initialImage={profilePicture} onImagePicked={setProfilePicture} buttonText="Change Profile Picture" />
                 <TextInput
                   style={commonStyles.input}
                   placeholder="First Name"
@@ -130,11 +128,10 @@ const pickNewProfilePicture = async () => {
               <Text style={commonStyles.buttonText}>Logout</Text>
             </TouchableOpacity>
           </>
-        ) : (
-          <Text>Loading...</Text>
         )}
-      </View>
-    </ScreenContainer>
+      </ScrollView>
+      <BottomNavigationBar navigation={navigation} />
+    </ImageBackground>
   );
 };
 

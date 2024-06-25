@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Alert, View, TouchableOpacity, Text } from 'react-native';
-import { useAuth } from '../contexts/AuthContext';
-import { getEvent, updateEvent, deleteEvent } from '../firebase/firestore';
-import commonStyles from '../styles/styles';
-import ScreenContainer from '../components/ScreenContainer';
+// screens/EditEvent.js
+import React, { useEffect, useState } from 'react';
 import EventForm from '../components/EventForm';
-import BottomNavigationBar from '../components/BottomNavigationBar';
+import { getEvent, updateEvent, handleDeleteEvent } from '../firebase/firestore';
+import { useAuth } from '../contexts/AuthContext'; 
+import { uploadImage } from '../firebase/storage';
+import { Alert, Text, View, Button, StyleSheet } from 'react-native'; // Import Alert, Text, View, Button, StyleSheet
 
-const EditEvent = ({ route, navigation }) => {
+const EditEvent = ({ navigation, route }) => {
   const { eventId } = route.params;
-  const [event, setEvent] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [initialData, setInitialData] = useState(null);
+  const { currentUser } = useAuth(); 
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -21,54 +20,61 @@ const EditEvent = ({ route, navigation }) => {
         setInitialData(event);
       } catch (error) {
         console.error('Error fetching event:', error);
-        Alert.alert('Error', 'Failed to load event details. Please try again.');
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchEvent();
   }, [eventId]);
 
-  const handleUpdateEvent = async (updatedEvent) => {
-    setLoading(true);
+  const handleSubmit = async (updatedEvent) => {
     try {
-      await updateEvent(eventId, updatedEvent);
+      let pictureUrl = initialData.picture;
+      if (updatedEvent.picture && updatedEvent.picture !== initialData.picture) {
+        pictureUrl = await uploadImage(updatedEvent.picture);
+      }
+
+      const eventToUpdate = {
+        ...updatedEvent,
+        picture: pictureUrl,
+      };
+
+      await updateEvent(eventId, eventToUpdate);
+
       Alert.alert('Event Updated', 'Your event has been updated successfully.');
       navigation.navigate('Events');
     } catch (error) {
       console.error('Error updating event:', error);
-      Alert.alert('Error', 'Failed to update event. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleDeleteEvent = async () => {
-    setLoading(true);
+  const handleDelete = async () => {
     try {
-      await deleteEvent(eventId);
-      Alert.alert('Event Deleted', 'Your event has been deleted successfully.');
+      await handleDeleteEvent(eventId, currentUser.uid);
+      Alert.alert('Event Deleted', 'The event has been deleted successfully.');
       navigation.navigate('Events');
     } catch (error) {
       console.error('Error deleting event:', error);
-      Alert.alert('Error', 'Failed to delete event. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-      <View style={{ flex: 1 }}>
-        <ScreenContainer loading={loading} onRefresh={() => {}}>
-          {event && <EventForm onSubmit={handleUpdateEvent} initialData={event} />}
-          <TouchableOpacity style={commonStyles.button} onPress={handleDeleteEvent}>
-            <Text style={commonStyles.buttonText}>Delete Event</Text>
-          </TouchableOpacity>
-        </ScreenContainer>
-        <BottomNavigationBar navigation={navigation} />
+    initialData ? (
+      <View style={styles.container}>
+        <EventForm onSubmit={handleSubmit} initialData={initialData} />
+        <Button title="Delete Event" onPress={handleDelete} color="red" />
       </View>
+    ) : (
+      <Text>Loading...</Text>
+    )
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center',
+  },
+});
 
 export default EditEvent;

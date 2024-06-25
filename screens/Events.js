@@ -10,7 +10,7 @@ import { useRefresh } from '../contexts/RefreshContext'; // Import RefreshContex
 
 
 const Events = ({ navigation }) => {
-  onRefresh(); // Refresh the list of events
+  //onRefresh(); // Refresh the list of events
   const [events, setEvents] = useState([]);
   const [registeredEvents, setRegisteredEvents] = useState([]);
   const [createdEvents, setCreatedEvents] = useState([]);
@@ -82,7 +82,7 @@ const Events = ({ navigation }) => {
 
 // Function to format time
 const formatTime = (timeString) => {
-  console.log("time in events:", timeString);
+  //console.log("time in events:", timeString);
 
   if (!timeString) {
     return 'Invalid time2';

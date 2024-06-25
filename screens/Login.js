@@ -29,7 +29,6 @@ const Login = ({ navigation }) => {
   return (
     <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.backgroundImage}>
       <ScrollView contentContainerStyle={commonStyles.scrollContent}>
-      <Text style={commonStyles.title}>Log In</Text>
       <TextInput
         placeholder="Email"
         value={email}

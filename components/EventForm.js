@@ -1,32 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, Alert, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, TouchableOpacity, Image } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import * as ImagePicker from 'expo-image-picker';
-import commonStyles from '../styles/styles';
+import ImagePickerComponent from '../components/ImagePickerComponent';
 
 const EventForm = ({ onSubmit, initialData = {} }) => {
-  
-
   const [eventName, setEventName] = useState(initialData.eventName || '');
   const [sportType, setSportType] = useState(initialData.sportType || '');
   const [location, setLocation] = useState(initialData.location || '');
   const [date, setDate] = useState(initialData.date ? new Date(initialData.date) : new Date());
 
-  function createDateFromTimeString(timeString) {
+  const createDateFromTimeString = (timeString) => {
+    if (!timeString) {
+      return new Date();
+    }
     const [hours, minutes, seconds] = timeString.split(':').map(Number);
     const date = new Date();
     date.setHours(hours);
     date.setMinutes(minutes);
     date.setSeconds(seconds);
     return date;
-  }
-  
-  // Usage example:
-  const specificTime = createDateFromTimeString(initialData.time);
-  const [time, setTime] = useState(specificTime);
-  console.log(specificTime);  // Output: Wed Jun 27 2024 14:45:30 GMT+0000 (Coordinated Universal Time)
-  
-  //const [time, setTime] = useState(initialData.time ? new Date(`1970-01-01T${initialData.time}Z`) : new Date());
+  };
+
+  const [time, setTime] = useState(createDateFromTimeString(initialData.time));
   const [participants, setParticipants] = useState(String(initialData.participants || ''));
   const [description, setDescription] = useState(initialData.description || '');
   const [picture, setPicture] = useState(initialData.picture || null);
@@ -39,21 +34,7 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
     if (initialData.participants !== undefined) {
       setParticipants(String(initialData.participants));
     }
-  
   }, [initialData.participants]);
-
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setPicture(result.assets[0].uri);
-    }
-  };
 
   const handleDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -68,6 +49,10 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
   };
 
   const handleSubmit = () => {
+    if (!eventName || !sportType || !location || !date || !time || !participants || !description || !picture) {
+      Alert.alert('Error', 'All fields are required.');
+      return;
+    }
     const formattedDate = date.toISOString().split('T')[0];
     const formattedTime = time.toTimeString().split(' ')[0];
     const eventToSubmit = {
@@ -80,11 +65,6 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
       description,
       picture,
     };
-
-    if (!eventName || !sportType || !location || !date || !time || !participants || !description || !picture) {
-      Alert.alert('Error', 'All fields are required.');
-      return;
-    }
 
     onSubmit(eventToSubmit);
   };
@@ -152,31 +132,62 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
         value={description}
         onChangeText={setDescription}
       />
-            <ImagePickerComponent initialImage={picture} onImagePicked={setPicture}  buttonText="Choose from Gallery" />
+      <ImagePickerComponent initialImage={picture} onImagePicked={setPicture} buttonText="Choose from Gallery" />
       <Button title="Submit" onPress={handleSubmit} />
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 100,
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Darker background
+  },
+  header: {
+    fontSize: 24,
+    marginBottom: 20,
+    textAlign: 'center',
+    color: 'white',
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 12,
+    padding: 8,
+    borderRadius: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 18,
+    color: 'black',
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: 'white',
+  },
   pickerContainer: {
     borderColor: 'gray',
     borderWidth: 1,
     marginBottom: 12,
     padding: 8,
     borderRadius: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
   },
   pickerItem: {
     padding: 8,
   },
   pickerItemText: {
     fontSize: 16,
+    color: 'black',
   },
   selectedSportType: {
     fontSize: 16,
     marginBottom: 12,
-    color: 'gray',
+    color: 'white',
     textAlign: 'center',
   },
   dateInput: {
@@ -187,11 +198,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingLeft: 8,
     borderRadius: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
   },
   dateText: {
     fontSize: 16,
+    color: 'black',
   },
-  uploadPictureContainer: {
+  image: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'cover',
     marginBottom: 12,
   },
 });

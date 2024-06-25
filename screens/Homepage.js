@@ -83,11 +83,11 @@ const Homepage = ({ navigation }) => {
         return;
       }
       let location = await Location.getCurrentPositionAsync({});
-      console.log('Location:', location);
+      //console.log('Location:', location);
       const response = await axios.get(
         `https://api.openweathermap.org/data/2.5/weather?lat=${location.coords.latitude}&lon=${location.coords.longitude}&appid=${OPENWEATHERMAP_API_KEY}`
       );
-      console.log('API Response:', response.data);
+      //console.log('API Response:', response.data);
       setWeatherData(response.data);
       setError(null);  // Clear any previous errors
     } catch (error) {
@@ -108,7 +108,7 @@ const Homepage = ({ navigation }) => {
   };
 
   const formatTime = (timeString) => {
-    console.log("time in homepage:", timeString);
+    //console.log("time in homepage:", timeString);
     if (!timeString) {
       return 'Invalid time2';
     }
