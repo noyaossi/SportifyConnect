@@ -1,23 +1,21 @@
 // screens/Events.js
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image, RefreshControl, ScrollView, ActivityIndicator  } from 'react-native';
-import { getEvents, getRegisteredEvents, unregisterForEvent, getCreatedEvents, handleDeleteEvent  } from '../firebase/firestore'; // Import function to fetch events and registered events from Firestore
+import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity, Image  } from 'react-native';
+import { getEvents, getRegisteredEvents, unregisterForEvent, getCreatedEvents  } from '../firebase/firestore'; // Import function to fetch events and registered events from Firestore
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth to get the current user
 import { Ionicons } from '@expo/vector-icons'; // Assuming you have installed expo vector icons
-import BottomNavigationBar from '../components/BottomNavigationBar';
 import { useRefresh } from '../contexts/RefreshContext'; // Import RefreshContext
+import ScreenContainer from '../components/ScreenContainer';
 
 
 const Events = ({ navigation }) => {
-  //onRefresh(); // Refresh the list of events
   const [events, setEvents] = useState([]);
   const [registeredEvents, setRegisteredEvents] = useState([]);
   const [createdEvents, setCreatedEvents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false); // Define loading state
   const { currentUser } = useAuth(); // Get the current user from AuthContext
-  const [loading, setLoading] = useState(false); // Add loading state
-  const { refreshing: contextRefreshing } = useRefresh(); // Get refreshing state from RefreshContext
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -56,12 +54,6 @@ const Events = ({ navigation }) => {
 
     fetchEvents(); // Call fetchEvents function
   }, [currentUser]);
-
-  useEffect(() => {
-    if (contextRefreshing) {
-      onRefresh();
-    }
-  }, [contextRefreshing]);
 
   const handleUnregister = async (eventId) => {
     try {
@@ -148,11 +140,9 @@ const formatTime = (timeString) => {
   );
 
   return (
-    <View style={styles.maincontainer}>
-      <ScrollView
-        contentContainerStyle={styles.scrollViewContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
+    <>
+
+    <ScreenContainer loading={loading || refreshing} onRefresh={onRefresh} navigation={navigation}>
         <View style={styles.container}>
           <Text style={styles.header}>Registered Events:</Text>
           {registeredEvents.length === 0 ? (
@@ -176,37 +166,34 @@ const formatTime = (timeString) => {
               scrollEnabled={false}
             />
           )}
-        </View>
-      </ScrollView>
-      <TouchableOpacity
+          </View>
+          </ScreenContainer>
+
+          <TouchableOpacity
         style={styles.fab}
         onPress={() => navigation.navigate('CreateEvent')}
       >
         <Ionicons name="add" size={30} color="white" />
       </TouchableOpacity>
-      <BottomNavigationBar navigation={navigation} />
-    </View>
+        </>
+
   );
 };
 
 const styles = StyleSheet.create({
-  maincontainer:{
-      flex: 1,
-      backgroundColor: 'white',
-  },
-  scrollViewContent: {
-    paddingBottom: 100, // Increased padding from 20 to 100
-  },
+  
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    //backgroundColor: 'white',
     padding: 20,
-    paddingBottom: 100, // Increased padding from 20 to 100
+    paddingBottom: 100, 
 
   },
   header: {
     fontSize: 24,
     marginVertical: 10,
+    color: 'white', // Changed to white for better visibility
+
   },
   eventItem: {
     marginBottom: 10,
@@ -214,9 +201,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    //flexDirection: 'row',
+    //justifyContent: 'space-between',
+    //alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Added background color for better visibility
   },
   eventDetailsContainer: {
     flex: 1,
@@ -239,7 +227,7 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 80, // Increased bottom margin to avoid overlap with the bottom navigation bar
+    bottom: 60, 
     backgroundColor: '#1E90FF',
     width: 60,
     height: 60,
@@ -247,6 +235,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 8,
+    zIndex: 1,
+
   },
 });
 

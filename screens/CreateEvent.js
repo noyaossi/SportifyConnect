@@ -1,15 +1,20 @@
 // screens/CreateEvent.js
-import React from 'react';
+import React, { useState } from 'react';
 import EventForm from '../components/EventForm';
 import { addEvent, createNewEvent } from '../firebase/firestore';
 import { uploadImage } from '../firebase/storage';
 import { useAuth } from '../contexts/AuthContext'; 
 import { Alert } from 'react-native';
+import ScreenContainer from '../components/ScreenContainer';
+
 
 const CreateEvent = ({ navigation }) => {
   const { currentUser } = useAuth(); 
+  const [loading, setLoading] = useState(false);
+
 
   const handleSubmit = async (newEvent) => {
+    setLoading(true);
     try {
       let pictureUrl = null;
       if (newEvent.picture) {
@@ -28,10 +33,17 @@ const CreateEvent = ({ navigation }) => {
       navigation.navigate('Events');
     } catch (error) {
       console.error('Error creating event:', error);
+    }  finally {
+      setLoading(false);
     }
   };
 
-  return <EventForm onSubmit={handleSubmit} />;
+  return (
+    <ScreenContainer loading={loading} onRefresh={() => {}} navigation={navigation}>
+      <EventForm onSubmit={handleSubmit} />
+    </ScreenContainer>
+  );
 };
+
 
 export default CreateEvent;

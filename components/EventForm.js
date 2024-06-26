@@ -1,3 +1,4 @@
+// components/EventForm.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, TouchableOpacity, Image } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Darker background
+    //backgroundColor: 'rgba(0, 0, 0, 0.5)', // Darker background
   },
   header: {
     fontSize: 24,

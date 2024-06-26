@@ -10,18 +10,17 @@ export default StyleSheet.create({
     justifyContent: 'center',
   },
   profileBackgroundImage: {
-    flex: 2,
+    flex: 1,
     resizeMode: 'cover',
     justifyContent: 'center',
-    //alignItems: 'center',
+    height: '100%',
+    width: '100%',
   },
   container: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Optional: Add a semi-transparent overlay
     padding: 20,
-    height: height,
   },
   input: {
     borderWidth: 1,
@@ -30,7 +29,7 @@ export default StyleSheet.create({
     marginVertical: 10,
     padding: 10,
     borderRadius: 5,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Optional: Add a background color for input fields
+    backgroundColor: 'rgba(255, 255, 255, 0.8)', 
     fontSize: 18,
   },
   button: {
@@ -42,11 +41,9 @@ export default StyleSheet.create({
     width: '80%',
     alignItems: 'center',
   },
-
   buttonText: {
     color: 'white',
     fontSize: 15,
-    //fontWeight: 'bold',
   },
   errorText: {
     color: 'red',
@@ -54,9 +51,9 @@ export default StyleSheet.create({
     marginTop: 20,
   },
   profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
     marginTop: 10,
     marginBottom: 10,
   },
@@ -64,7 +61,7 @@ export default StyleSheet.create({
     fontSize: 24,
     marginBottom: 16,
     textAlign: 'center',
-    color: 'white', // Adjust color as needed
+    color: 'white', 
   },
   scrollContent: {
     padding: 20,
@@ -73,6 +70,5 @@ export default StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)', // Optional: Add a semi-transparent overlay
-
   },
 });

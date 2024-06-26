@@ -1,39 +1,36 @@
+// screens/Profile.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, Alert, ScrollView, ImageBackground } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { getUser, updateUser } from '../firebase/firestore';
 import ImagePickerComponent from '../components/ImagePickerComponent';
-import BottomNavigationBar from '../components/BottomNavigationBar'; // Import BottomNavigationBar
 import commonStyles from '../styles/styles';
 import db, {setupDatabase} from '../services/DatabaseService';
+import ScreenContainer from '../components/ScreenContainer';
+
 
 const Profile = ({ navigation }) => {
   const { currentUser, logout } = useAuth();
   const [userData, setUserData] = useState(null);
   const [editing, setEditing] = useState(false);
   const [profilePicture, setProfilePicture] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true); 
 
-  useEffect(() => {
-    fetchUserDetails();
-  }, []);
-
-    const fetchUserDetails = async () => {
-      setIsRefreshing(true);
-
+    const fetchUserData = async () => {
       try {
         const data = await getUser(currentUser.uid);
         setUserData(data);
         setProfilePicture(data.profilepicture);
       } catch (error) {
-        console.error('Error fetching user details:', error);
+        console.error('Error fetching user data:', error);
       } finally {
-        setIsLoading(false);
-        setIsRefreshing(false);
-
+        setLoading(false);
       }
     };
+
+    useEffect(() => {
+      fetchUserData();
+    }, [currentUser]);
 
     const handleUpdate = async () => {
       try {
@@ -50,11 +47,6 @@ const Profile = ({ navigation }) => {
       }
     };
   
-
-
-
-
-
   const handleLogout = async () => {
     try {
       await logout();
@@ -65,17 +57,15 @@ const Profile = ({ navigation }) => {
   };
 
   return (
-    <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.profileBackgroundImage}>
-      <ScrollView contentContainerStyle={commonStyles.scrollContent}>
-        {isLoading ? (
-          <Text>Loading...</Text>
-        ) : (
+    <ScreenContainer loading={loading} onRefresh={fetchUserData} navigation={navigation}>
+      <View style={commonStyles.container}>
+        {userData ? (
           <>
             <Text style={commonStyles.title}>
               {editing ? 'Edit Profile' : `${userData.firstname} ${userData.lastname}`}
             </Text>
-            <View style={styles.imageContainer}>
-              {profilePicture && !editing && <Image source={{ uri: profilePicture }} style={styles.profileImage} />}
+            <View style={commonStyles.imageContainer}>
+              {profilePicture && !editing && <Image source={{ uri: profilePicture }} style={commonStyles.profileImage} />}
               {editing && (
                 <ImagePickerComponent initialImage={profilePicture} onImagePicked={setProfilePicture} buttonText="Change Profile Picture" />
               )}
@@ -115,10 +105,10 @@ const Profile = ({ navigation }) => {
               </>
             ) : (
               <>
-                <Text style={styles.label}>First Name: {userData.firstname}</Text>
-                <Text style={styles.label}>Last Name: {userData.lastname}</Text>
-                <Text style={styles.label}>Email: {userData.email}</Text>
-                <Text style={styles.label}>Mobile Number: {userData.mobilenumber}</Text>
+                <Text style={commonStyles.label}>First Name: {userData.firstname}</Text>
+                <Text style={commonStyles.label}>Last Name: {userData.lastname}</Text>
+                <Text style={commonStyles.label}>Email: {userData.email}</Text>
+                <Text style={commonStyles.label}>Mobile Number: {userData.mobilenumber}</Text>
                 <TouchableOpacity style={commonStyles.button} onPress={() => setEditing(true)}>
                   <Text style={commonStyles.buttonText}>Edit Profile</Text>
                 </TouchableOpacity>
@@ -128,30 +118,12 @@ const Profile = ({ navigation }) => {
               <Text style={commonStyles.buttonText}>Logout</Text>
             </TouchableOpacity>
           </>
+        ) : (
+          <Text>Loading...</Text>
         )}
-      </ScrollView>
-      <BottomNavigationBar navigation={navigation} />
-    </ImageBackground>
+      </View>
+    </ScreenContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  label: {
-    fontSize: 18,
-    color: 'white',
-    marginBottom: 10,
-  },
-  imageContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  profileImage: {
-    width: 150, // Increased size
-    height: 150, // Increased size
-    borderRadius: 75, // Adjust border radius for a round image
-    marginTop: 10,
-    marginBottom: 10,
-  },
-});
 
 export default Profile;

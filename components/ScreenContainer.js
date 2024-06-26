@@ -1,39 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { ScrollView, RefreshControl, ActivityIndicator, View } from 'react-native';
+// components/ScreenContainer.js
+import React from 'react';
+import { View, ActivityIndicator, RefreshControl, ScrollView, ImageBackground} from 'react-native';
+import BottomNavigationBar from '../components/BottomNavigationBar';
+import commonStyles from '../styles/styles';
 
-const ScreenContainer = ({ children, onRefresh }) => {
-  const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadInitialData = async () => {
-      setLoading(true);
-      await onRefresh();
-      setLoading(false);
-    };
-
-    loadInitialData();
-  }, []);
-
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await onRefresh();
-    setRefreshing(false);
-  };
-
+const ScreenContainer = ({ children, loading, onRefresh, navigation }) => {
   return (
-    <ScrollView
-      contentContainerStyle={{ flexGrow: 1 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
-    >
-      {loading ? (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.backgroundImage}>
+      <ScrollView
+        contentContainerStyle={commonStyles.scrollContent}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} />}
+      >
+        {loading ? (
           <ActivityIndicator size="large" color="#0000ff" />
-        </View>
-      ) : (
-        children
-      )}
-    </ScrollView>
+        ) : (
+          children
+        )}
+      </ScrollView>
+      <BottomNavigationBar navigation={navigation} />
+    </ImageBackground>
   );
 };
 
