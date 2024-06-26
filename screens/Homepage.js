@@ -10,6 +10,8 @@ import axios from 'axios';
 import * as Location from 'expo-location';
 import { OPENWEATHERMAP_API_KEY } from '@env';
 import ScreenContainer from '../components/ScreenContainer';
+import { useIsFocused } from '@react-navigation/native';
+
 
 const sportOptions = ['All Events', 'Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball', 'Events on Selected Date'];
 
@@ -24,6 +26,8 @@ const Homepage = ({ navigation }) => {
   const [error, setError] = useState(null);
   const { currentUser } = useAuth();
   const { refreshing: contextRefreshing } = useRefresh();
+  const isFocused = useIsFocused();
+
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -40,6 +44,11 @@ const Homepage = ({ navigation }) => {
   };
 
   useEffect(() => {
+    if (isFocused) {
+      // Refresh your data or perform other actions here
+      onRefresh();
+    }
+
     const fetchEvents = async () => {
       try {
         const eventsData = await getEvents();
@@ -51,13 +60,13 @@ const Homepage = ({ navigation }) => {
       }
     };
     fetchEvents();
-  }, [currentUser]);
+  }, [currentUser, isFocused]);
 
-  useEffect(() => {
-    if (contextRefreshing) {
-      onRefresh();
-    }
-  }, [contextRefreshing]);
+  // useEffect(() => {
+  //   if (contextRefreshing) {
+  //     onRefresh();
+  //   }
+  // }, [contextRefreshing]);
 
   const handleRegister = async (eventId) => {
     try {

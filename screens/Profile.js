@@ -8,7 +8,6 @@ import commonStyles from '../styles/styles';
 import db, {setupDatabase} from '../services/DatabaseService';
 import ScreenContainer from '../components/ScreenContainer';
 
-
 const Profile = ({ navigation }) => {
   const { currentUser, logout } = useAuth();
   const [userData, setUserData] = useState(null);
