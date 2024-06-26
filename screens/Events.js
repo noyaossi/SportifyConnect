@@ -24,6 +24,7 @@ const Events = ({ navigation }) => {
     setRefreshing(true);
     try {
       const eventsData = await getEvents(); // Fetch events data from Firestore
+      //to add if empty use the cache
       setEvents(eventsData); // Update state with fetched events
       const registeredEventsData = await getRegisteredEvents(currentUser.uid); // Fetch registered events data from Firestore
       setRegisteredEvents(registeredEventsData); // Update registered events state
