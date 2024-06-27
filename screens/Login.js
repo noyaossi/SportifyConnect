@@ -1,12 +1,11 @@
 // screens/Login.js
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, Switch, Pressable } from 'react-native';
 import { loginUser } from '../firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import commonStyles from '../styles/styles'; // Import common styles
 import ScreenContainer from '../components/ScreenContainer';
-
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -72,7 +71,6 @@ const Login = ({ navigation }) => {
         keyboardType="email-address"
         style={commonStyles.input}
         placeholderTextColor="#aaa" // Optional: Change placeholder text color
-
       />
       <TextInput
         placeholder="Password"
@@ -82,6 +80,13 @@ const Login = ({ navigation }) => {
         style={commonStyles.input}
         placeholderTextColor="#aaa" // Optional: Change placeholder text color
       />
+      <View style={styles.rememberMeContainer}>
+            <Switch
+              value={rememberMe}
+              onValueChange={setRememberMe}
+            />
+            <Text style={styles.rememberMeText}>Remember Me</Text>
+        </View>
       <TouchableOpacity style={commonStyles.button} onPress={handleLogin}>
           <Text style={commonStyles.buttonText}>Login</Text>
         </TouchableOpacity>
