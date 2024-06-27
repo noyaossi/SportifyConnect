@@ -1,17 +1,16 @@
+// screens/Homepage.js
+
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image, ScrollView, RefreshControl, ActivityIndicator, Button } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
 import { getEvents, registerForEvent } from '../firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
-import BottomNavigationBar from '../components/BottomNavigationBar';
-import { Ionicons } from '@expo/vector-icons';
-import { useRefresh } from '../contexts/RefreshContext';
 import { Calendar } from 'react-native-calendars';
 import axios from 'axios';
 import * as Location from 'expo-location';
 import { OPENWEATHERMAP_API_KEY } from '@env';
 import ScreenContainer from '../components/ScreenContainer';
 import { useIsFocused } from '@react-navigation/native';
-
+import { Card, Button, Chip, Divider } from 'react-native-paper';
 
 const sportOptions = ['All Events', 'Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball', 'Events on Selected Date'];
 
@@ -25,9 +24,7 @@ const Homepage = ({ navigation }) => {
   const [loadingWeather, setLoadingWeather] = useState(true);
   const [error, setError] = useState(null);
   const { currentUser } = useAuth();
-  const { refreshing: contextRefreshing } = useRefresh();
   const isFocused = useIsFocused();
-
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -45,7 +42,6 @@ const Homepage = ({ navigation }) => {
 
   useEffect(() => {
     if (isFocused) {
-      // Refresh your data or perform other actions here
       onRefresh();
     }
 
@@ -61,12 +57,6 @@ const Homepage = ({ navigation }) => {
     };
     fetchEvents();
   }, [currentUser, isFocused]);
-
-  // useEffect(() => {
-  //   if (contextRefreshing) {
-  //     onRefresh();
-  //   }
-  // }, [contextRefreshing]);
 
   const handleRegister = async (eventId) => {
     try {
@@ -146,164 +136,185 @@ const Homepage = ({ navigation }) => {
   }, [selectedSport, selectedDate, events]);
 
   const renderEventItem = ({ item }) => (
-    <View style={styles.eventItem}>
-      <View style={styles.eventDetailsContainer}>
+    <Card style={styles.eventCard}>
+      {item.picture && <Card.Cover source={{ uri: item.picture }} style={styles.eventImage} />}
+      <Card.Content>
         <Text style={styles.eventName}>{item.eventName}</Text>
-        <Text style={styles.eventDetails}>{item.sportType}</Text>
+        <Chip style={styles.sportChip}>{item.sportType}</Chip>
         <Text style={styles.eventDetails}>{item.location}</Text>
-        <Text style={styles.eventDetails}>{formatDate(item.date)}</Text>
-        <Text style={styles.eventDetails}>{formatTime(item.time)}</Text>
+        <Text style={styles.eventDetails}>{formatDate(item.date)} at {formatTime(item.time)}</Text>
         <Text style={styles.eventDetails}>Participants: {item.participants}</Text>
-        <Text style={styles.eventDetails}>{item.description}</Text>
-      </View>
-      {item.picture && <Image source={{ uri: item.picture }} style={styles.eventImage} />}
-      <Button title="Register" onPress={() => handleRegister(item.id)} />
-    </View>
+        <Divider style={styles.divider} />
+        <Text style={styles.eventDescription}>{item.description}</Text>
+      </Card.Content>
+      <Card.Actions>
+        <Button mode="contained" onPress={() => handleRegister(item.id)}>
+          Register
+        </Button>
+      </Card.Actions>
+    </Card>
   );
-
   return (
     <ScreenContainer loading={refreshing} onRefresh={onRefresh} navigation={navigation}>
-      <View style={styles.container}>
-        <Text style={styles.header}>Current Weather:</Text>
-        {loadingWeather ? (
-          <ActivityIndicator size="large" color="#0000ff" />
-        ) : error ? (
-          <Text style={styles.errorText}>Error fetching weather data: {error}</Text>
-        ) : weatherData ? (
-          <View style={styles.weatherContainer}>
-            <Text style={styles.weatherText}>Location: {weatherData.name}</Text>
-            <Text style={styles.weatherText}>Description: {weatherData.weather[0].description}</Text>
-            <Text style={styles.weatherText}>Temperature: {kelvinToCelsius(weatherData.main.temp)}°C / {kelvinToFahrenheit(weatherData.main.temp)}°F</Text>
-            <Text style={styles.weatherText}>Feels Like: {kelvinToCelsius(weatherData.main.feels_like)}°C / {kelvinToFahrenheit(weatherData.main.feels_like)}°F</Text>
-            <Text style={styles.weatherText}>Humidity: {weatherData.main.humidity}%</Text>
-          </View>
-        ) : (
-          <Text>No weather data available at the moment.</Text>
-        )}
+      <ScrollView contentContainerStyle={styles.container}>
+        <Card style={styles.weatherCard}>
+          <Card.Title title="Current Weather" />
+          <Card.Content>
+            {loadingWeather ? (
+              <ActivityIndicator size="small" color="#0000ff" />
+            ) : error ? (
+              <Text style={styles.errorText}>Error fetching weather data: {error}</Text>
+            ) : weatherData ? (
+              <View>
+                <Text style={styles.weatherText}>Location: {weatherData.name}</Text>
+                <Text style={styles.weatherText}>Description: {weatherData.weather[0].description}</Text>
+                <Text style={styles.weatherText}>Temperature: {kelvinToCelsius(weatherData.main.temp)}°C / {kelvinToFahrenheit(weatherData.main.temp)}°F</Text>
+                <Text style={styles.weatherText}>Feels Like: {kelvinToCelsius(weatherData.main.feels_like)}°C / {kelvinToFahrenheit(weatherData.main.feels_like)}°F</Text>
+                <Text style={styles.weatherText}>Humidity: {weatherData.main.humidity}%</Text>
+              </View>
+            ) : (
+              <Text>No weather data available at the moment.</Text>
+            )}
+          </Card.Content>
+        </Card>
+
         <Calendar
+          style={styles.calendar}
           onDayPress={day => setSelectedDate(day.dateString)}
           markedDates={{
-            [selectedDate]: { selected: true, selectedColor: 'blue' }
+            [selectedDate]: { selected: true, selectedColor: '#007AFF' }
+          }}
+          theme={{
+            backgroundColor: '#ffffff',
+            calendarBackground: '#ffffff',
+            textSectionTitleColor: '#b6c1cd',
+            selectedDayBackgroundColor: '#007AFF',
+            selectedDayTextColor: '#ffffff',
+            todayTextColor: '#007AFF',
+            dayTextColor: '#2d4150',
+            textDisabledColor: '#d9e1e8',
+            dotColor: '#007AFF',
+            selectedDotColor: '#ffffff',
+            arrowColor: '#007AFF',
+            monthTextColor: '#2d4150',
+            indicatorColor: '#007AFF',
           }}
         />
+
         <View style={styles.sportFilterContainer}>
-          {sportOptions.map(option => (
-            <TouchableOpacity
-              key={option}
-              style={[
-                styles.sportFilterButton,
-                selectedSport === option && styles.sportFilterButtonSelected
-              ]}
-              onPress={() => {
-                setSelectedSport(option);
-                if (option === 'All Events' || option === 'Events on Selected Date') {
-                  setSelectedDate(null);
-                }
-              }}
-            >
-              <Text style={styles.sportFilterButtonText}>{option}</Text>
-            </TouchableOpacity>
-          ))}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {sportOptions.map(option => (
+              <Chip
+                key={option}
+                style={styles.sportFilterChip}
+                selected={selectedSport === option}
+                onPress={() => {
+                  setSelectedSport(option);
+                  if (option === 'All Events' || option === 'Events on Selected Date') {
+                    setSelectedDate(null);
+                  }
+                }}
+              >
+                {option}
+              </Chip>
+            ))}
+          </ScrollView>
         </View>
-        <Text style={styles.header}>Explore Events:</Text>
+
+        <Text style={styles.header}>Explore Events</Text>
         {filteredEvents.length === 0 ? (
-          <Text>No events available at the moment.</Text>
+          <Text style={styles.noEventsText}>No events available at the moment.</Text>
         ) : (
           <FlatList
             data={filteredEvents}
             renderItem={renderEventItem}
             keyExtractor={(item) => item.id}
             scrollEnabled={false}
+            contentContainerStyle={styles.eventList}
           />
         )}
-      </View>
+      </ScrollView>
     </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: 'white',
-    padding: 20,
-    paddingBottom: 100,
+    flexGrow: 1,
+    backgroundColor: '#F5F5F5',
+    padding: 16,
   },
   header: {
     fontSize: 24,
-    marginVertical: 10,
+    marginVertical: 16,
+    fontWeight: 'bold',
+    color: '#333',
   },
-  eventItem: {
-    marginBottom: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  weatherCard: {
+    marginBottom: 16,
+    elevation: 2,
   },
-  eventDetailsContainer: {
-    flex: 1,
-    marginRight: 10,
+  calendar: {
+    marginBottom: 16,
+    borderRadius: 8,
+    elevation: 2,
+  },
+  sportFilterContainer: {
+    marginBottom: 16,
+  },
+  sportFilterChip: {
+    marginRight: 8,
+  },
+  eventCard: {
+    marginBottom: 16,
+    borderRadius: 8,
+    elevation: 2,
+    overflow: 'hidden', // This ensures the image doesn't overflow the card's rounded corners
+  },
+  eventImage: {
+    height: 200, // Adjust this value as needed
+    resizeMode: 'cover',
   },
   eventName: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  sportChip: {
+    alignSelf: 'flex-start',
+    marginBottom: 8,
   },
   eventDetails: {
-    fontSize: 16,
-    color: '#888',
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
   },
-  eventImage: {
-    width: 100,
-    height: 100,
-    resizeMode: 'cover',
-    borderRadius: 10,
+  divider: {
+    marginVertical: 8,
   },
-  sportFilterContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginVertical: 10,
-  },
-  sportFilterButton: {
-    borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 20,
-    padding: 10,
-    margin: 5,
-  },
-  sportFilterButtonSelected: {
-    backgroundColor: 'blue',
-  },
-  sportFilterButtonText: {
-    color: 'black',
-  },
-  fab: {
-    position: 'absolute',
-    right: 20,
-    bottom: 80,
-    backgroundColor: '#1E90FF',
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 8,
-  },
-  weatherContainer: {
-    marginTop: 20,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
+  eventDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 8,
   },
   weatherText: {
-    fontSize: 16,
-    color: '#888',
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
   },
   errorText: {
     color: 'red',
+    fontSize: 14,
+  },
+  eventList: {
+    paddingBottom: 20,
+  },
+  noEventsText: {
     fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 
