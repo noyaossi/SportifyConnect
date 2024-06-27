@@ -1,11 +1,15 @@
 // screens/Register.js
 
 import React, { useState } from 'react';
-import { ScrollView, Text, TextInput, Alert, TouchableOpacity, ImageBackground } from 'react-native';
+import { ScrollView, Text, TextInput, Alert, TouchableOpacity } from 'react-native';
 import { registerUser } from '../firebase/auth'; // Import registerUser from firebase/auth
 import { addUser } from '../firebase/firestore'; // Import addUser from firebase/firestore
 import commonStyles from '../styles/styles'; // Import common styles
 import ImagePickerComponent from '../components/ImagePickerComponent'; // Import ImagePickerComponent
+import { uploadImageToStorage } from '../firebase/storage'; // Import the upload image function
+import ScreenContainer from '../components/ScreenContainer';
+
+
 
 
 
@@ -19,7 +23,16 @@ const Register = ({ navigation }) => {
   const [error, setError] = useState('');
 
 
+
   const handleRegister = async () => {
+    if (!firstname || !lastname || !email || !mobilenumber || !password) {
+      Alert.alert(
+        'Missing Information',
+        'Please fill in all fields',
+        [{ text: 'OK', onPress: () => console.log('OK Pressed') }]
+      );
+      return;
+    }
     try {
       const userCredential = await registerUser(email, password);
       const user = userCredential.user;
@@ -44,13 +57,11 @@ const Register = ({ navigation }) => {
       const errorMessage = error.message;
       console.error('Error during registration:', error);
       Alert.alert('Registration Failed', errorMessage);
-    }
+    } 
   };
 
-
   return (
-    <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.backgroundImage}>
-      <ScrollView contentContainerStyle={commonStyles.scrollContent}>
+    <ScreenContainer loading={false} onRefresh={() => {}} navigation={navigation} hideBottomNav>
       <Text style={commonStyles.title}>Register</Text>
       <TextInput
         style={commonStyles.input}
@@ -95,8 +106,8 @@ const Register = ({ navigation }) => {
         <TouchableOpacity style={commonStyles.button} onPress={() => navigation.navigate('Login')}>
           <Text style={commonStyles.buttonText}>Already have an account? Login</Text>
         </TouchableOpacity>
-        </ScrollView>
-        </ImageBackground>
+        </ScreenContainer>
+
   );
 };
 export default Register;

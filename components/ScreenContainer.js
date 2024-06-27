@@ -4,7 +4,7 @@ import { View, ActivityIndicator, RefreshControl, ScrollView, ImageBackground} f
 import BottomNavigationBar from '../components/BottomNavigationBar';
 import commonStyles from '../styles/styles';
 
-const ScreenContainer = ({ children, loading, onRefresh, navigation }) => {
+const ScreenContainer = ({ children, loading, onRefresh, navigation, hideBottomNav}) => {
   return (
     <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.backgroundImage}>
       <ScrollView
@@ -17,7 +17,7 @@ const ScreenContainer = ({ children, loading, onRefresh, navigation }) => {
           children
         )}
       </ScrollView>
-      <BottomNavigationBar navigation={navigation} />
+      {!hideBottomNav && <BottomNavigationBar navigation={navigation} />}
     </ImageBackground>
   );
 };

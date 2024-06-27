@@ -1,10 +1,12 @@
 // screens/Login.js
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, ImageBackground, StyleSheet, TouchableOpacity, ScrollView, Switch, Pressable } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { loginUser } from '../firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import commonStyles from '../styles/styles'; // Import common styles
+import ScreenContainer from '../components/ScreenContainer';
+
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -32,7 +34,11 @@ const Login = ({ navigation }) => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      setError('Please enter both email and password');
+      Alert.alert(
+        'Missing Information',
+        'Please enter both email and password',
+          [{ text: 'OK', onPress: () => console.log('OK Pressed') }]
+        );
       return;
     }
     try {
@@ -52,14 +58,12 @@ const Login = ({ navigation }) => {
       setError(error.message);
     }
   };
-
   const handleRegister = () => {
     navigation.navigate('Register'); // Navigate to the Register screen
   };
 
   return (
-    <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.backgroundImage}>
-      <ScrollView contentContainerStyle={commonStyles.scrollContent}>
+    <ScreenContainer loading={false} onRefresh={() => {}} navigation={navigation} hideBottomNav>
       <Text style={commonStyles.title}>Log In</Text>
       <TextInput
         placeholder="Email"
@@ -85,8 +89,7 @@ const Login = ({ navigation }) => {
           <Text style={commonStyles.buttonText}>Don't have an account? Register</Text>
         </TouchableOpacity>
         {error ? <Text style={commonStyles.errorText}>{error}</Text> : null}
-      </ScrollView>
-    </ImageBackground>
+        </ScreenContainer>
   );
 };
 
@@ -104,3 +107,4 @@ const styles = StyleSheet.create({
 });
 
 export default Login;
+
