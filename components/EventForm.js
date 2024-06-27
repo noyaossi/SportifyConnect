@@ -1,19 +1,37 @@
-// screens/EditEvent.js
-import React, { useEffect, useState } from 'react';
-import EventForm from '../components/EventForm';
-import { getEvent, updateEvent, handleDeleteEvent } from '../firebase/firestore';
-import { useAuth } from '../contexts/AuthContext'; 
-import { uploadImage } from '../firebase/storage';
-import { Alert, Text, View, Button, StyleSheet, TouchableOpacity } from 'react-native'; // Import Alert, Text, View, Button, StyleSheet
-import ScreenContainer from '../components/ScreenContainer';
+// components/EventForm.js
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, TouchableOpacity, Image } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import ImagePickerComponent from '../components/ImagePickerComponent';
+import { Picker } from '@react-native-picker/picker';
+import { Ionicons } from '@expo/vector-icons';
 
+const EventForm = ({ onSubmit, initialData = {} }) => {
+  const [eventName, setEventName] = useState(initialData.eventName || '');
+  const [sportType, setSportType] = useState(initialData.sportType || '');
+  const [location, setLocation] = useState(initialData.location || '');
+  const [date, setDate] = useState(initialData.date ? new Date(initialData.date) : new Date());
 
-const EditEvent = ({ navigation, route }) => {
-  const { eventId } = route.params;
-  const [initialData, setInitialData] = useState(null);
-  const { currentUser } = useAuth(); 
-  const [loading, setLoading] = useState(true);
+  const createDateFromTimeString = (timeString) => {
+    if (!timeString) {
+      return new Date();
+    }
+    const [hours, minutes, seconds] = timeString.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours);
+    date.setMinutes(minutes);
+    date.setSeconds(seconds);
+    return date;
+  };
 
+  const [time, setTime] = useState(createDateFromTimeString(initialData.time));
+  const [participants, setParticipants] = useState(String(initialData.participants || ''));
+  const [description, setDescription] = useState(initialData.description || '');
+  const [picture, setPicture] = useState(initialData.picture || null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+
+  const sportOptions = ['Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball', 'Yoga'];
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -73,51 +91,146 @@ const EditEvent = ({ navigation, route }) => {
   };
 
   return (
-    <ScreenContainer loading={loading} onRefresh={() => {}} navigation={navigation}>
-      {initialData ? (
-        <View style={styles.container}>
-          <Text style={styles.header}>Edit Event</Text>
-          <EventForm onSubmit={handleSubmit} initialData={initialData} />
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-            <Text style={styles.deleteButtonText}>Delete Event</Text>
+    <ScrollView contentContainerStyle={styles.scrollContent}>
+      <Text style={styles.header}>Event Form:</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Event Name"
+        value={eventName}
+        onChangeText={setEventName}
+      />
+      <Text style={styles.label}>Sport Type</Text>
+      <View style={styles.pickerContainer}>
+        {sportOptions.map((option) => (
+          <TouchableOpacity
+            key={option}
+            style={styles.pickerItem}
+            onPress={() => setSportType(option)}
+          >
+            <Text style={styles.pickerItemText}>{option}</Text>
           </TouchableOpacity>
-
-        </View>
-      ) : (
-        <Text>Loading...</Text>
+        ))}
+      </View>
+      <Text style={styles.selectedSportType}>{sportType}</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Location"
+        value={location}
+        onChangeText={setLocation}
+      />
+      <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateInput}>
+        <Text style={styles.dateText}>{date.toDateString()}</Text>
+      </TouchableOpacity>
+      {showDatePicker && (
+        <DateTimePicker
+          value={date}
+          mode="date"
+          display="default"
+          onChange={handleDateChange}
+        />
       )}
-    </ScreenContainer>
+      <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.dateInput}>
+        <Text style={styles.dateText}>{time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</Text>
+      </TouchableOpacity>
+      {showTimePicker && (
+        <DateTimePicker
+          value={time}
+          mode="time"
+          display="default"
+          onChange={handleTimeChange}
+        />
+      )}
+      <TextInput
+        style={styles.input}
+        placeholder="Number Of Participants"
+        keyboardType="number-pad"
+        value={participants}
+        onChangeText={setParticipants}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Event Description"
+        value={description}
+        onChangeText={setDescription}
+      />
+      <ImagePickerComponent initialImage={picture} onImagePicked={setPicture} buttonText="Choose from Gallery" />
+      <Button title="Submit" onPress={handleSubmit} />
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 100,
+    flexGrow: 1,
     justifyContent: 'center',
-    
-  },
-  deleteButton: {
-    backgroundColor: 'purple',
-    paddingVertical: 15,
-    borderRadius: 10,
     alignItems: 'center',
-    //marginTop: 20,
-    alignSelf: 'center',
-    width: 334,
-  },
-  deleteButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
+    //backgroundColor: 'rgba(0, 0, 0, 0.5)', // Darker background
   },
   header: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#8A2BE2',
+    fontSize: 24,
+    marginBottom: 20,
+    textAlign: 'center',
+    color: 'white',
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 12,
+    padding: 8,
+    borderRadius: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 18,
+    color: 'black',
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: 'white',
+  },
+  pickerContainer: {
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 12,
+    padding: 8,
+    borderRadius: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  pickerItem: {
+    padding: 8,
+  },
+  pickerItemText: {
+    fontSize: 16,
+    color: 'black',
+  },
+  selectedSportType: {
+    fontSize: 16,
+    marginBottom: 12,
+    color: 'white',
     textAlign: 'center',
   },
-
-
+  dateInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 12,
+    justifyContent: 'center',
+    paddingLeft: 8,
+    borderRadius: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  dateText: {
+    fontSize: 16,
+    color: 'black',
+  },
+  image: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'cover',
+    marginBottom: 12,
+  },
 });
 
 export default EditEvent;
