@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext'; // Import useAuth to get the 
 import { Ionicons } from '@expo/vector-icons'; // Assuming you have installed expo vector icons
 import { useRefresh } from '../contexts/RefreshContext'; // Import RefreshContext
 import ScreenContainer from '../components/ScreenContainer';
+import { useIsFocused } from '@react-navigation/native';
 
 
 const Events = ({ navigation }) => {
@@ -16,11 +17,14 @@ const Events = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false); // Define loading state
   const { currentUser } = useAuth(); // Get the current user from AuthContext
+  const isFocused = useIsFocused();
+
 
   const onRefresh = async () => {
     setRefreshing(true);
     try {
       const eventsData = await getEvents(); // Fetch events data from Firestore
+      //to add if empty use the cache
       setEvents(eventsData); // Update state with fetched events
       const registeredEventsData = await getRegisteredEvents(currentUser.uid); // Fetch registered events data from Firestore
       setRegisteredEvents(registeredEventsData); // Update registered events state
@@ -35,6 +39,10 @@ const Events = ({ navigation }) => {
 
   useEffect(() => {
     setLoading(true); // Set loading to true when fetching events
+    if (isFocused) {
+      // Refresh your data or perform other actions here
+      onRefresh();
+    }
 
     // Fetch all events when the component mounts
     const fetchEvents = async () => {
@@ -53,7 +61,7 @@ const Events = ({ navigation }) => {
     };
 
     fetchEvents(); // Call fetchEvents function
-  }, [currentUser]);
+  }, [currentUser, isFocused]);
 
   const handleUnregister = async (eventId) => {
     try {

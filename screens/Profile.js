@@ -5,9 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { getUser, updateUser } from '../firebase/firestore';
 import ImagePickerComponent from '../components/ImagePickerComponent';
 import commonStyles from '../styles/styles';
-import db, {setupDatabase} from '../services/DatabaseService';
 import ScreenContainer from '../components/ScreenContainer';
-
 
 const Profile = ({ navigation }) => {
   const { currentUser, logout } = useAuth();

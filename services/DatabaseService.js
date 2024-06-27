@@ -1,41 +1,79 @@
-import * as SQLite from 'expo-sqlite';
+import db from './Cache.js';
 
-let db = null;
-
-export const setupDatabase = async () => {
-  if (!db) {
-    db = await SQLite.openDatabaseAsync('Cache.db');
-  }
-
-  await db.execAsync([{
-    sql: `CREATE TABLE IF NOT EXISTS profile (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            uri TEXT NOT NULL,
-          );`,
-    args: []
-  }]);
+export const getAllEvents = () => {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM events',
+        [],
+        (_, { rows }) => resolve(rows._array),
+        (_, error) => reject(error)
+      );
+    });
+  });
 };
 
-export const insertPhoto = async (uri) => {
-  if (!db) {
-    db = await SQLite.openDatabaseAsync('Cache.db');
-  }
-
-  return db.execAsync([{
-    sql: 'INSERT INTO profile (uri) VALUES (?);',
-    args: [uri]
-  }]);
+export const getEventById = (id) => {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM events WHERE id = ?',
+        [id],
+        (_, { rows }) => resolve(rows.item(0)),
+        (_, error) => reject(error)
+      );
+    });
+  });
 };
 
-export const getPhotos = async () => {
-  if (!db) {
-    db = await SQLite.openDatabaseAsync('Cache.db');
-  }
+export const getEventsByDate = (date) => {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM events WHERE date = ?',
+        [date],
+        (_, { rows }) => resolve(rows._array),
+        (_, error) => reject(error)
+      );
+    });
+  });
+};
 
-  const result = await db.execAsync([{
-    sql: 'SELECT * FROM profile;',
-    args: []
-  }]);
+export const getEventsBySportType = (sportType) => {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM events WHERE sportType = ?',
+        [sportType],
+        (_, { rows }) => resolve(rows._array),
+        (_, error) => reject(error)
+      );
+    });
+  });
+};
 
-  return result[0].rows._array;
+export const insertEvent = (event) => {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'INSERT OR REPLACE INTO events (id, eventName, sportType, location, date, time, participants, description, eventImage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [event.id, event.eventName, event.sportType, event.location, event.date, event.time, event.participants, event.description, event.eventImage],
+        (_, { rowsAffected }) => resolve(rowsAffected),
+        (_, error) => reject(error)
+      );
+    });
+  });
+};
+
+export const deleteEvent = (id) => {
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'DELETE FROM events WHERE id = ?',
+        [id],
+        (_, { rowsAffected }) => resolve(rowsAffected),
+        (_, error) => reject(error)
+      );
+    });
+  });
 };
