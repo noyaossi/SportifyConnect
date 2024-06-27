@@ -6,7 +6,6 @@ import { Picker } from '@react-native-picker/picker';
 import { addEvent, createNewEvent } from '../firebase/firestore';
 import { uploadImage } from '../firebase/storage';
 import { useAuth } from '../contexts/AuthContext';
-import { Alert } from 'react-native';
 import ScreenContainer from '../components/ScreenContainer';
 
 const CreateEvent = ({ navigation }) => {
