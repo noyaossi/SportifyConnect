@@ -284,4 +284,28 @@ export const handleDeleteEvent = async (eventId, userId) => {
   }
 };
 
+// export const getAllRegisteredUsersForEvent = async (eventId) => {
+//   try {
+//     const eventRef = doc(firestore, 'events', eventId);
+//     const eventSnap = await getDoc(eventRef);
+//     if (!eventSnap.exists()) {
+//       throw new Error('Event does not exist');
+//     }
+//     const eventData = eventSnap.data();
+//     const registeredUsers = eventData.registeredUsers || [];
+
+//     return registeredUsers;
+//     // const usersPromises = registeredUsers.map(async (userId) => {
+//     //   const userDoc = await getDoc(doc(firestore, 'users', userId));
+//     //   return { id: userDoc.id, ...userDoc.data() };
+//     // });
+
+//     // const registeredUsersData = await Promise.all(usersPromises);
+//     // return registeredUsersData;
+//   } catch (error) {
+//     console.error('Error fetching registered users:', error);
+//     throw error;
+//   }
+// };
+
 export default firestore;
