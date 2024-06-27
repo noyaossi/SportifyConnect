@@ -1,11 +1,11 @@
 // screens/Events.js
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image  } from 'react-native';
-import { getEvents, getRegisteredEvents, unregisterForEvent, getCreatedEvents  } from '../firebase/firestore'; // Import function to fetch events and registered events from Firestore
-import { useAuth } from '../contexts/AuthContext'; // Import useAuth to get the current user
-import { Ionicons } from '@expo/vector-icons'; // Assuming you have installed expo vector icons
-import { useRefresh } from '../contexts/RefreshContext'; // Import RefreshContext
+import { View, Text, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
+// Import function to fetch events and registered events from Firestore
+import { getEvents, getRegisteredEvents, unregisterForEvent, getCreatedEvents  } from '../firebase/firestore'; 
+import { useAuth } from '../contexts/AuthContext'; 
+import { Ionicons } from '@expo/vector-icons'; 
 import ScreenContainer from '../components/ScreenContainer';
 import { useIsFocused } from '@react-navigation/native';
 import { Card, Button, Chip, Divider } from 'react-native-paper';
@@ -103,11 +103,20 @@ const formatTime = (timeString) => {
     <Card style={styles.eventCard}>
       {item.picture && <Card.Cover source={{ uri: item.picture }} style={styles.eventImage} />}
       <Card.Content>
-        <Text style={styles.eventName}>{item.eventName}</Text>
-        <Chip style={styles.sportChip}>{item.sportType}</Chip>
-        <Text style={styles.eventDetails}>{item.location}</Text>
-        <Text style={styles.eventDetails}>{formatDate(item.date)} at {formatTime(item.time)}</Text>
-        <Text style={styles.eventDetails}>Participants: {item.participants}</Text>
+      <Text style={styles.eventName}>{item.eventName}</Text>
+        <Chip icon="tag" style={styles.sportChip}>{item.sportType}</Chip>
+        <View style={styles.eventDetailsContainer}>
+          <Ionicons name="location" size={16} color="#8A2BE2" style={styles.icon} />
+          <Text style={styles.eventDetails}>{item.location}</Text>
+        </View>
+        <View style={styles.eventDetailsContainer}>
+          <Ionicons name="calendar" size={16} color="#8A2BE2" style={styles.icon} />
+          <Text style={styles.eventDetails}>{formatDate(item.date)} at {formatTime(item.time)}</Text>
+        </View>
+        <View style={styles.eventDetailsContainer}>
+          <Ionicons name="people" size={16} color="#8A2BE2" style={styles.icon} />
+          <Text style={styles.eventDetails}>Participants: {item.participants}</Text>
+        </View>
         <Divider style={styles.divider} />
         <Text style={styles.eventDescription}>{item.description}</Text>
       </Card.Content>
@@ -135,7 +144,7 @@ const formatTime = (timeString) => {
         <View style={styles.container}>
           <Text style={styles.header}>Registered Events</Text>
           {registeredEvents.length === 0 ? (
-            <Text style={styles.noEventsText}>You are not currently registered for any events.</Text>
+            <Text style={styles.noEventsText}>You are currently not registered for any events.</Text>
           ) : (
             <FlatList
               data={registeredEvents}
@@ -146,7 +155,7 @@ const formatTime = (timeString) => {
           )}
           <Text style={styles.header}>Created Events</Text>
           {createdEvents.length === 0 ? (
-            <Text style={styles.noEventsText}>You have not created any events.</Text>
+            <Text style={styles.noEventsText}>You have not created any events yet.</Text>
           ) : (
             <FlatList
               data={createdEvents}
@@ -169,31 +178,25 @@ const formatTime = (timeString) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-    padding: 16,
-  },
-  header: {
-    fontSize: 24,
-    marginVertical: 16,
-    fontWeight: 'bold',
-    color: '#333',
+    flexGrow: 1,
   },
   eventCard: {
     marginBottom: 16,
     borderRadius: 8,
-    elevation: 2,
-    overflow: 'hidden',
+    elevation: 3,
+    backgroundColor: '#FFFFFF',
   },
   eventImage: {
     height: 200,
-    resizeMode: 'cover',
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
   },
   eventName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#8A2BE2',
     marginBottom: 8,
+    marginTop: 10,
   },
   sportChip: {
     alignSelf: 'flex-start',
@@ -216,13 +219,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     textAlign: 'center',
-    marginTop: 20,
+    marginBottom: 20,
   },
   fab: {
     position: 'absolute',
     right: 20,
     bottom: 60,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#8A2BE2',
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -231,6 +234,34 @@ const styles = StyleSheet.create({
     elevation: 8,
     zIndex: 1,
   },
+  header: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#8A2BE2',
+    textAlign: 'left',
+    marginBottom: 20,
+  },
+  eventDetailsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  eventDetails: {
+    fontSize: 14,
+    color: '#666',
+  },
+  divider: {
+    marginVertical: 8,
+  },
+  eventDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 8,
+  },
+  icon: {
+    marginRight: 8,
+  },
+
 });
 
 
