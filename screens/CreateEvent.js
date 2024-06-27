@@ -1,6 +1,6 @@
 // screens/CreateEvent.js
 import React, { useState } from 'react';
-import { StyleSheet, Alert, ScrollView } from 'react-native';
+import { StyleSheet, Alert, View } from 'react-native';
 import { Card, Title } from 'react-native-paper';
 import EventForm from '../components/EventForm';
 import { addEvent, createNewEvent } from '../firebase/firestore';
@@ -37,21 +37,21 @@ const CreateEvent = ({ navigation }) => {
 
   return (
     <ScreenContainer loading={loading} onRefresh={() => {}} navigation={navigation}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.container}>
         <Card style={styles.card}>
           <Card.Content>
             <Title style={styles.title}>Create New Event</Title>
             <EventForm onSubmit={handleSubmit} />
           </Card.Content>
         </Card>
-      </ScrollView>
+      </View>
     </ScreenContainer>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
+    flex: 1,
     backgroundColor: '#F5F5F5',
     padding: 16,
   },
