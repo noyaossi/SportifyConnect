@@ -68,7 +68,7 @@ const Login = ({ navigation }) => {
       //navigation.navigate('Homepage');
       navigateToHomepage();
     } catch (error) {
-      setError(error.message);
+      setError("Email or Password are Incorrect");
     }
   };
   const handleRegister = () => {
