@@ -1,20 +1,14 @@
 // styles.js
 import { StyleSheet, Dimensions } from 'react-native';
 
-const { height } = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 
 export default StyleSheet.create({
-  backgroundImage: {
+  fullScreenContainer: {
     flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center',
-  },
-  profileBackgroundImage: {
-    flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center',
-    height: '100%',
-    width: '100%',
+    // width: width,
+    // height: height,
+    //backgroundColor: 'white', // or any color you prefer
   },
   container: {
     flex: 1,
@@ -29,11 +23,11 @@ export default StyleSheet.create({
     marginVertical: 10,
     padding: 10,
     borderRadius: 5,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', 
+    backgroundColor: 'white',
     fontSize: 18,
   },
   button: {
-    backgroundColor: '#304462', 
+    backgroundColor: '#6200EE',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
@@ -61,14 +55,11 @@ export default StyleSheet.create({
     fontSize: 24,
     marginBottom: 16,
     textAlign: 'center',
-    color: 'white', 
+    color: '#6200EE',
   },
   scrollContent: {
     padding: 20,
     paddingBottom: 100,
     flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Optional: Add a semi-transparent overlay
   },
 });
