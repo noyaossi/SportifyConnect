@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons'; // Assuming you have installed ex
 import { useRefresh } from '../contexts/RefreshContext'; // Import RefreshContext
 import ScreenContainer from '../components/ScreenContainer';
 import { useIsFocused } from '@react-navigation/native';
+import { Card, Button, Chip, Divider } from 'react-native-paper';
 
 
 const Events = ({ navigation }) => {
@@ -98,63 +99,43 @@ const formatTime = (timeString) => {
   
 
   // Render each event item in a FlatList
-  const renderEventItem = ({ item }) => (
-    <View style={styles.eventItem}>
-      <View style={styles.eventDetailsContainer}>
+  const renderEventItem = (item, actions) => (
+    <Card style={styles.eventCard}>
+      {item.picture && <Card.Cover source={{ uri: item.picture }} style={styles.eventImage} />}
+      <Card.Content>
         <Text style={styles.eventName}>{item.eventName}</Text>
-        <Text style={styles.eventDetails}>{item.sportType}</Text>
+        <Chip style={styles.sportChip}>{item.sportType}</Chip>
         <Text style={styles.eventDetails}>{item.location}</Text>
-        <Text style={styles.eventDetails}>{formatDate(item.date)}</Text>
-        <Text style={styles.eventDetails}>{formatTime(item.time)}</Text>
+        <Text style={styles.eventDetails}>{formatDate(item.date)} at {formatTime(item.time)}</Text>
         <Text style={styles.eventDetails}>Participants: {item.participants}</Text>
-        <Text style={styles.eventDetails}>{item.description}</Text>
-      </View>
-      {item.picture && <Image source={{ uri: item.picture }} style={styles.eventImage} />}
-    </View>
+        <Divider style={styles.divider} />
+        <Text style={styles.eventDescription}>{item.description}</Text>
+      </Card.Content>
+      {actions && <Card.Actions>{actions}</Card.Actions>}
+    </Card>
   );
 
+  const renderRegisteredEventItem = ({ item }) => 
+    renderEventItem(item, (
+      <Button mode="contained" onPress={() => handleUnregister(item.id)} color="red">
+        Unregister
+      </Button>
+    ));
 
-  const renderRegisteredEventItem = ({ item }) => (
-    <View style={styles.eventItem}>
-      <View style={styles.eventDetailsContainer}>
-        <Text style={styles.eventName}>{item.eventName}</Text>
-        <Text style={styles.eventDetails}>{item.sportType}</Text>
-        <Text style={styles.eventDetails}>{item.location}</Text>
-        <Text style={styles.eventDetails}>{formatDate(item.date)}</Text>
-        <Text style={styles.eventDetails}>{formatTime(item.time)}</Text>
-        <Text style={styles.eventDetails}>Participants: {item.participants}</Text>
-        <Text style={styles.eventDetails}>{item.description}</Text>
-      </View>
-      {item.picture && <Image source={{ uri: item.picture }} style={styles.eventImage} />}
-      <Button title="Unregister" onPress={() => handleUnregister(item.id)} color="red" />
-    </View>
-  );
-  const renderCreatedEventItem = ({ item }) => (
-    <View style={styles.eventItem}>
-      <View style={styles.eventDetailsContainer}>
-        <Text style={styles.eventName}>{item.eventName}</Text>
-        <Text style={styles.eventDetails}>{item.sportType}</Text>
-        <Text style={styles.eventDetails}>{item.location}</Text>
-        <Text style={styles.eventDetails}>{formatDate(item.date)}</Text>
-        <Text style={styles.eventDetails}>{formatTime(item.time)}</Text>
-        <Text style={styles.eventDetails}>Participants: {item.participants}</Text>
-        <Text style={styles.eventDetails}>{item.description}</Text>
-      </View>
-      {item.picture && <Image source={{ uri: item.picture }} style={styles.eventImage} />}
-      <View style={styles.buttonContainer}>
-        <Button title="Edit" onPress={() => navigation.navigate('EditEvent', { eventId: item.id })} color="blue" />
-      </View>
-    </View>
-  );
+  const renderCreatedEventItem = ({ item }) => 
+    renderEventItem(item, (
+      <Button mode="contained" onPress={() => navigation.navigate('EditEvent', { eventId: item.id })} color="blue">
+        Edit
+      </Button>
+    ));
 
   return (
     <>
-
-    <ScreenContainer loading={loading || refreshing} onRefresh={onRefresh} navigation={navigation}>
+      <ScreenContainer loading={loading || refreshing} onRefresh={onRefresh} navigation={navigation}>
         <View style={styles.container}>
-          <Text style={styles.header}>Registered Events:</Text>
+          <Text style={styles.header}>Registered Events</Text>
           {registeredEvents.length === 0 ? (
-            <Text>You are not currently registered for any events.</Text>
+            <Text style={styles.noEventsText}>You are not currently registered for any events.</Text>
           ) : (
             <FlatList
               data={registeredEvents}
@@ -163,9 +144,9 @@ const formatTime = (timeString) => {
               scrollEnabled={false}
             />
           )}
-          <Text style={styles.header}>Created Events:</Text>
+          <Text style={styles.header}>Created Events</Text>
           {createdEvents.length === 0 ? (
-            <Text>You have not created any events.</Text>
+            <Text style={styles.noEventsText}>You have not created any events.</Text>
           ) : (
             <FlatList
               data={createdEvents}
@@ -174,69 +155,74 @@ const formatTime = (timeString) => {
               scrollEnabled={false}
             />
           )}
-          </View>
-          </ScreenContainer>
-
-          <TouchableOpacity
+        </View>
+      </ScreenContainer>
+      <TouchableOpacity
         style={styles.fab}
         onPress={() => navigation.navigate('CreateEvent')}
       >
         <Ionicons name="add" size={30} color="white" />
       </TouchableOpacity>
-        </>
-
+    </>
   );
 };
 
 const styles = StyleSheet.create({
-  
   container: {
     flex: 1,
-    //backgroundColor: 'white',
-    padding: 20,
-    paddingBottom: 100, 
-
+    backgroundColor: '#F5F5F5',
+    padding: 16,
   },
   header: {
     fontSize: 24,
-    marginVertical: 10,
-    color: 'white', // Changed to white for better visibility
-
+    marginVertical: 16,
+    fontWeight: 'bold',
+    color: '#333',
   },
-  eventItem: {
-    marginBottom: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    //flexDirection: 'row',
-    //justifyContent: 'space-between',
-    //alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Added background color for better visibility
+  eventCard: {
+    marginBottom: 16,
+    borderRadius: 8,
+    elevation: 2,
+    overflow: 'hidden',
   },
-  eventDetailsContainer: {
-    flex: 1,
-    marginRight: 10,
+  eventImage: {
+    height: 200,
+    resizeMode: 'cover',
   },
   eventName: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  sportChip: {
+    alignSelf: 'flex-start',
+    marginBottom: 8,
   },
   eventDetails: {
-    fontSize: 16,
-    color: '#888',
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
   },
-  eventImage: {
-    width: 100,
-    height: 100,
-    resizeMode: 'cover',
-    borderRadius: 10,
+  divider: {
+    marginVertical: 8,
+  },
+  eventDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 8,
+  },
+  noEventsText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 20,
   },
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 60, 
-    backgroundColor: '#1E90FF',
+    bottom: 60,
+    backgroundColor: '#007AFF',
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -244,8 +230,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 8,
     zIndex: 1,
-
   },
 });
+
 
 export default Events;
