@@ -29,10 +29,12 @@ const Homepage = ({ navigation }) => {
   const onRefresh = async () => {
     setRefreshing(true);
     try {
+      if (currentUser) {
       const eventsData = await getEvents();
       setEvents(eventsData);
       setFilteredEvents(eventsData);
       await fetchWeatherData();
+      }
     } catch (error) {
       console.error('Error fetching events or weather data:', error);
     } finally {
@@ -45,17 +47,21 @@ const Homepage = ({ navigation }) => {
       onRefresh();
     }
 
-    const fetchEvents = async () => {
-      try {
-        const eventsData = await getEvents();
-        setEvents(eventsData);
-        setFilteredEvents(eventsData);
-        await fetchWeatherData();
-      } catch (error) {
-        console.error('Error fetching events:', error);
-      }
-    };
-    fetchEvents();
+ const fetchEvents = async () => {
+  try {
+    if (currentUser) {
+    const eventsData = await getEvents();
+    setEvents(eventsData);
+    setFilteredEvents(eventsData);
+    await fetchWeatherData();
+    }
+  } catch (error) {
+    console.error('Error fetching events:', error);
+  }
+  };
+
+fetchEvents(); 
+   
   }, [currentUser, isFocused]);
 
   const handleRegister = async (eventId) => {
@@ -130,6 +136,7 @@ const Homepage = ({ navigation }) => {
     }
     setFilteredEvents(filtered);
   };
+ 
 
   useEffect(() => {
     filterEvents();
@@ -269,7 +276,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 8,
     elevation: 2,
-    overflow: 'hidden', // This ensures the image doesn't overflow the card's rounded corners
+    //overflow: 'hidden', // This ensures the image doesn't overflow the card's rounded corners
   },
   eventImage: {
     height: 200, // Adjust this value as needed

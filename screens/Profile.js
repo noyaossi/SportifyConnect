@@ -1,6 +1,6 @@
 // screens/Profile.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, Image, TouchableOpacity, Alert } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { getUser, updateUser } from '../firebase/firestore';
 import ImagePickerComponent from '../components/ImagePickerComponent';
@@ -15,6 +15,10 @@ const Profile = ({ navigation }) => {
   const [loading, setLoading] = useState(true); 
 
     const fetchUserData = async () => {
+      if (!currentUser) {
+        setLoading(false);
+      return;
+      }
       try {
         const data = await getUser(currentUser.uid);
         setUserData(data);
@@ -31,6 +35,7 @@ const Profile = ({ navigation }) => {
     }, [currentUser]);
 
     const handleUpdate = async () => {
+      if (!currentUser) return;
       try {
         const updatedUser = {
           ...userData,

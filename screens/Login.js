@@ -1,12 +1,12 @@
 // screens/Login.js
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, ImageBackground, StyleSheet, TouchableOpacity, ScrollView, Switch, Pressable } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { loginUser } from '../firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import commonStyles from '../styles/styles'; // Import common styles
+import ScreenContainer from '../components/ScreenContainer';
 
-import loginStyle from '../styles/login';
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -33,6 +33,14 @@ const Login = ({ navigation }) => {
   }, []);
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert(
+        'Missing Information',
+        'Please enter both email and password',
+          [{ text: 'OK', onPress: () => console.log('OK Pressed') }]
+        );
+      return;
+    }
     try {
       await loginUser(email, password);
 
@@ -50,46 +58,38 @@ const Login = ({ navigation }) => {
       setError(error.message);
     }
   };
-
   const handleRegister = () => {
     navigation.navigate('Register'); // Navigate to the Register screen
   };
 
   return (
-    <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.backgroundImage}>
-      <ScrollView contentContainerStyle={commonStyles.scrollContent}>
-        <TextInput
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          style={commonStyles.input}
-          placeholderTextColor="#aaa" // Optional: Change placeholder text color
-        />
-        <TextInput
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          style={commonStyles.input}
-          placeholderTextColor="#aaa" // Optional: Change placeholder text color
-        />
-        <View style={styles.rememberMeContainer}>
-            <Switch
-              value={rememberMe}
-              onValueChange={setRememberMe}
-            />
-            <Text style={styles.rememberMeText}>Remember Me</Text>
-        </View>
-        <TouchableOpacity style={commonStyles.button} onPress={handleLogin}>
+    <ScreenContainer loading={false} onRefresh={() => {}} navigation={navigation} hideBottomNav>
+      <Text style={commonStyles.title}>Log In</Text>
+      <TextInput
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        style={commonStyles.input}
+        placeholderTextColor="#aaa" // Optional: Change placeholder text color
+
+      />
+      <TextInput
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        style={commonStyles.input}
+        placeholderTextColor="#aaa" // Optional: Change placeholder text color
+      />
+      <TouchableOpacity style={commonStyles.button} onPress={handleLogin}>
           <Text style={commonStyles.buttonText}>Login</Text>
         </TouchableOpacity>
         <TouchableOpacity style={commonStyles.button} onPress={handleRegister}>
           <Text style={commonStyles.buttonText}>Don't have an account? Register</Text>
         </TouchableOpacity>
         {error ? <Text style={commonStyles.errorText}>{error}</Text> : null}
-      </ScrollView>
-    </ImageBackground>
+        </ScreenContainer>
   );
 };
 
@@ -107,3 +107,4 @@ const styles = StyleSheet.create({
 });
 
 export default Login;
+
