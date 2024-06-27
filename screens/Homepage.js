@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
-import { getEvents, registerForEvent } from '../firebase/firestore';
+import { getEvents, registerForEvent, getAllRegisteredUsersForEvent } from '../firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { Calendar } from 'react-native-calendars';
 import axios from 'axios';
@@ -26,6 +26,8 @@ const Homepage = ({ navigation }) => {
   const [error, setError] = useState(null);
   const { currentUser } = useAuth();
   const isFocused = useIsFocused();
+  const [isUserRegistered, setisUserRegistered] = useState(false);
+
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -72,7 +74,7 @@ fetchEvents();
       onRefresh();
     } catch (error) {
       console.error('Error registering for event:', error);
-      alert('Error registering for event.');
+      alert('Error registering for event');
     }
   };
 
@@ -143,40 +145,51 @@ fetchEvents();
     filterEvents();
   }, [selectedSport, selectedDate, events]);
 
-  const renderEventItem = ({ item }) => (
-    <Card style={styles.eventCard}>
-      {item.picture && <Card.Cover source={{ uri: item.picture }} style={styles.eventImage} />}
-      <Card.Content>
-        <Text style={styles.eventName}>{item.eventName}</Text>
-        <Chip icon="tag" style={styles.sportChip}>{item.sportType}</Chip>
-        <View style={styles.eventDetailsContainer}>
-          <Ionicons name="location" size={16} color="#8A2BE2" style={styles.icon} />
-          <Text style={styles.eventDetails}>{item.location}</Text>
-        </View>
-        <View style={styles.eventDetailsContainer}>
-          <Ionicons name="calendar" size={16} color="#8A2BE2" style={styles.icon} />
-          <Text style={styles.eventDetails}>{formatDate(item.date)} at {formatTime(item.time)}</Text>
-        </View>
-        <View style={styles.eventDetailsContainer}>
-          <Ionicons name="people" size={16} color="#8A2BE2" style={styles.icon} />
-          <Text style={styles.eventDetails}>Participants: {item.participants}</Text>
-        </View>
-        <Divider style={styles.divider} />
-        <Text style={styles.eventDescription}>{item.description}</Text>
-      </Card.Content>
-      <Card.Actions>
-        <Button 
-          mode="contained" 
-          onPress={() => handleRegister(item.id)}
-          icon={({size, color}) => (
-            <Ionicons name="add-circle-outline" size={size} color={color} />
-          )}
-        >
-          Register
-        </Button>
-      </Card.Actions>
-    </Card>
-  );
+  const renderEventItem = ({ item }) => {
+    // const registeredUsers = await getAllRegisteredUsersForEvent(item.id); 
+    // if (registeredUsers && Array.isArray(registeredUsers)) {
+    //   if(registeredUsers.includes(currentUser.uid)){
+    //     setisUserRegistered(trrue);
+    //   }
+    // }
+  
+    return (
+      <Card style={styles.eventCard}>
+        {item.picture && <Card.Cover source={{ uri: item.picture }} style={styles.eventImage} />}
+        <Card.Content>
+          <Text style={styles.eventName}>{item.eventName}</Text>
+          <Chip icon="tag" style={styles.sportChip}>{item.sportType}</Chip>
+          <View style={styles.eventDetailsContainer}>
+            <Ionicons name="location" size={16} color="#8A2BE2" style={styles.icon} />
+            <Text style={styles.eventDetails}>{item.location}</Text>
+          </View>
+          <View style={styles.eventDetailsContainer}>
+            <Ionicons name="calendar" size={16} color="#8A2BE2" style={styles.icon} />
+            <Text style={styles.eventDetails}>{formatDate(item.date)} at {formatTime(item.time)}</Text>
+          </View>
+          <View style={styles.eventDetailsContainer}>
+            <Ionicons name="people" size={16} color="#8A2BE2" style={styles.icon} />
+            <Text style={styles.eventDetails}>Participants: {item.participants.length}</Text>
+          </View>
+          <Divider style={styles.divider} />
+          <Text style={styles.eventDescription}>{item.description}</Text>
+        </Card.Content>
+        <Card.Actions>
+          <Button 
+            mode="contained" 
+            onPress={() => handleRegister(item.id)}
+            // disabled={isUserRegistered}
+            icon={({size, color}) => (
+              <Ionicons name="add-circle-outline" size={size} color={color} />
+            )}
+          >
+            {/* {isUserRegistered ? 'Registered' : 'Register'} */}
+          </Button>
+        </Card.Actions>
+      </Card>
+    );
+  };
+  
 
   return (
     <ScreenContainer loading={refreshing} onRefresh={onRefresh} navigation={navigation}>
