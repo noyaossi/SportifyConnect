@@ -4,7 +4,7 @@ import EventForm from '../components/EventForm';
 import { getEvent, updateEvent, handleDeleteEvent } from '../firebase/firestore';
 import { useAuth } from '../contexts/AuthContext'; 
 import { uploadImage } from '../firebase/storage';
-import { Alert, Text, View, Button, StyleSheet } from 'react-native'; // Import Alert, Text, View, Button, StyleSheet
+import { Alert, Text, View, Button, StyleSheet, TouchableOpacity } from 'react-native'; // Import Alert, Text, View, Button, StyleSheet
 import ScreenContainer from '../components/ScreenContainer';
 
 
@@ -76,8 +76,12 @@ const EditEvent = ({ navigation, route }) => {
     <ScreenContainer loading={loading} onRefresh={() => {}} navigation={navigation}>
       {initialData ? (
         <View style={styles.container}>
+          <Text style={styles.header}>Edit Event</Text>
           <EventForm onSubmit={handleSubmit} initialData={initialData} />
-          <Button title="Delete Event" onPress={handleDelete} color="red" />
+          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+            <Text style={styles.deleteButtonText}>Delete Event</Text>
+          </TouchableOpacity>
+
         </View>
       ) : (
         <Text>Loading...</Text>
@@ -89,10 +93,31 @@ const EditEvent = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     justifyContent: 'center',
     
   },
+  deleteButton: {
+    backgroundColor: 'purple',
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    //marginTop: 20,
+    alignSelf: 'center',
+    width: 334,
+  },
+  deleteButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  header: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#8A2BE2',
+    textAlign: 'center',
+  },
+
+
 });
 
 export default EditEvent;

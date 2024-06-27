@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, TouchableOpacity, Image } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import ImagePickerComponent from '../components/ImagePickerComponent';
+import { Picker } from '@react-native-picker/picker';
+import { Ionicons } from '@expo/vector-icons';
 
 const EventForm = ({ onSubmit, initialData = {} }) => {
   const [eventName, setEventName] = useState(initialData.eventName || '');
@@ -71,34 +73,46 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContent}>
-      <Text style={styles.header}>Event Form:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Event Name"
-        value={eventName}
-        onChangeText={setEventName}
-      />
-      <Text style={styles.label}>Sport Type</Text>
-      <View style={styles.pickerContainer}>
-        {sportOptions.map((option) => (
-          <TouchableOpacity
-            key={option}
-            style={styles.pickerItem}
-            onPress={() => setSportType(option)}
-          >
-            <Text style={styles.pickerItemText}>{option}</Text>
-          </TouchableOpacity>
-        ))}
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+      
+      <View style={styles.inputContainer}>
+        <Ionicons name="calendar" size={24} color="#8A2BE2" style={styles.icon} />
+        <TextInput
+          style={styles.input}
+          placeholder="Event Name"
+          placeholderTextColor="#A9A9A9"
+          value={eventName}
+          onChangeText={setEventName}
+        />
       </View>
-      <Text style={styles.selectedSportType}>{sportType}</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Location"
-        value={location}
-        onChangeText={setLocation}
-      />
-      <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.dateInput}>
+
+      <View style={styles.inputContainer}>
+        <Ionicons name="basketball" size={24} color="#8A2BE2" style={styles.icon} />
+        <Picker
+          selectedValue={sportType}
+          style={styles.picker}
+          onValueChange={(itemValue) => setSportType(itemValue)}
+        >
+          <Picker.Item label="Select Sport Type" value="" />
+          {sportOptions.map((sport) => (
+            <Picker.Item key={sport} label={sport} value={sport} />
+          ))}
+        </Picker>
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Ionicons name="location" size={24} color="#8A2BE2" style={styles.icon} />
+        <TextInput
+          style={styles.input}
+          placeholder="Location"
+          placeholderTextColor="#A9A9A9"
+          value={location}
+          onChangeText={setLocation}
+        />
+      </View>
+
+      <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.inputContainer}>
+        <Ionicons name="calendar" size={24} color="#8A2BE2" style={styles.icon} />
         <Text style={styles.dateText}>{date.toDateString()}</Text>
       </TouchableOpacity>
       {showDatePicker && (
@@ -109,7 +123,9 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
           onChange={handleDateChange}
         />
       )}
-      <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.dateInput}>
+
+      <TouchableOpacity onPress={() => setShowTimePicker(true)} style={styles.inputContainer}>
+        <Ionicons name="time" size={24} color="#8A2BE2" style={styles.icon} />
         <Text style={styles.dateText}>{time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</Text>
       </TouchableOpacity>
       {showTimePicker && (
@@ -120,96 +136,104 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
           onChange={handleTimeChange}
         />
       )}
-      <TextInput
-        style={styles.input}
-        placeholder="Number Of Participants"
-        keyboardType="number-pad"
-        value={participants}
-        onChangeText={setParticipants}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Event Description"
-        value={description}
-        onChangeText={setDescription}
-      />
-      <ImagePickerComponent initialImage={picture} onImagePicked={setPicture} buttonText="Choose from Gallery" />
-      <Button title="Submit" onPress={handleSubmit} />
+
+      <View style={styles.inputContainer}>
+        <Ionicons name="people" size={24} color="#8A2BE2" style={styles.icon} />
+        <TextInput
+          style={styles.input}
+          placeholder="Number of Participants"
+          placeholderTextColor="#A9A9A9"
+          keyboardType="number-pad"
+          value={participants}
+          onChangeText={setParticipants}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
+        <Ionicons name="document-text" size={24} color="#8A2BE2" style={styles.icon} />
+        <TextInput
+          style={[styles.input, styles.multilineInput]}
+          placeholder="Event Description"
+          placeholderTextColor="#A9A9A9"
+          multiline
+          numberOfLines={4}
+          value={description}
+          onChangeText={setDescription}
+        />
+      </View>
+
+      <ImagePickerComponent initialImage={picture} onImagePicked={setPicture} buttonText="Change Event Image" />
+
+      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <Text style={styles.submitButtonText}>Submit</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    //backgroundColor: '#F0E6FF',
+  },
   scrollContent: {
     padding: 20,
-    paddingBottom: 100,
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    //backgroundColor: 'rgba(0, 0, 0, 0.5)', // Darker background
+    paddingBottom: 40,
   },
   header: {
-    fontSize: 24,
+    fontSize: 28,
+    fontWeight: 'bold',
     marginBottom: 20,
+    color: '#8A2BE2',
     textAlign: 'center',
-    color: 'white',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  icon: {
+    marginRight: 10,
   },
   input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 12,
-    padding: 8,
-    borderRadius: 5,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    fontSize: 18,
-    color: 'black',
-  },
-  label: {
+    flex: 1,
+    height: 50,
     fontSize: 16,
-    marginBottom: 8,
-    color: 'white',
+    color: '#333',
   },
-  pickerContainer: {
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 12,
-    padding: 8,
-    borderRadius: 5,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-  },
-  pickerItem: {
-    padding: 8,
-  },
-  pickerItemText: {
-    fontSize: 16,
-    color: 'black',
-  },
-  selectedSportType: {
-    fontSize: 16,
-    marginBottom: 12,
-    color: 'white',
-    textAlign: 'center',
-  },
-  dateInput: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 12,
-    justifyContent: 'center',
-    paddingLeft: 8,
-    borderRadius: 5,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  picker: {
+    flex: 1,
+    height: 50,
   },
   dateText: {
+    flex: 1,
     fontSize: 16,
-    color: 'black',
+    color: '#333',
+    paddingVertical: 15,
   },
-  image: {
-    width: '100%',
-    height: 200,
-    resizeMode: 'cover',
-    marginBottom: 12,
+  multilineInput: {
+    height: 100,
+    textAlignVertical: 'center',
+  },
+  submitButton: {
+    backgroundColor: '#8A2BE2',
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  submitButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 

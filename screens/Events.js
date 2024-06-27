@@ -135,7 +135,7 @@ const formatTime = (timeString) => {
         <View style={styles.container}>
           <Text style={styles.header}>Registered Events</Text>
           {registeredEvents.length === 0 ? (
-            <Text style={styles.noEventsText}>You are not currently registered for any events.</Text>
+            <Text style={styles.noEventsText}>You are currently not registered for any events.</Text>
           ) : (
             <FlatList
               data={registeredEvents}
@@ -146,7 +146,7 @@ const formatTime = (timeString) => {
           )}
           <Text style={styles.header}>Created Events</Text>
           {createdEvents.length === 0 ? (
-            <Text style={styles.noEventsText}>You have not created any events.</Text>
+            <Text style={styles.noEventsText}>You have not created any events yet.</Text>
           ) : (
             <FlatList
               data={createdEvents}
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
     textAlign: 'center',
-    marginTop: 20,
+    marginBottom: 20,
   },
   fab: {
     position: 'absolute',
@@ -231,6 +231,14 @@ const styles = StyleSheet.create({
     elevation: 8,
     zIndex: 1,
   },
+  header: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#8A2BE2',
+    textAlign: 'left',
+    marginBottom: 20,
+  },
+
 });
 
 
