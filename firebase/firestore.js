@@ -164,20 +164,43 @@ export const createNewEvent = async (userId, eventId) => {
 export const unregisterForEvent = async (userId, eventId) => {
   try {
     const userRef = doc(firestore, 'users', userId);
-    const userSnap = await getDoc(userRef);
+    const eventRef = doc(firestore, 'events', eventId);
+
+    // Get both user and event data
+    const [userSnap, eventSnap] = await Promise.all([getDoc(userRef), getDoc(eventRef)]);
+
     if (!userSnap.exists()) {
       throw new Error('User does not exist');
     }
-    
+
+    if (!eventSnap.exists()) {
+      throw new Error('Event does not exist');
+    }
+
     const userData = userSnap.data();
+    const eventData = eventSnap.data();
+
     const registeredEvents = userData.registeredEvents || [];
-    
-    if (registeredEvents.includes(eventId)) {
-      const updatedEvents = registeredEvents.filter(id => id !== eventId);
-      await updateDoc(userRef, { registeredEvents: updatedEvents });
-    } else {
+    const registeredUsers = eventData.registeredUsers || [];
+
+    if (!registeredEvents.includes(eventId)) {
       throw new Error('User not registered for this event');
     }
+
+    // Remove event from user's registeredEvents
+    const updatedUserEvents = registeredEvents.filter(id => id !== eventId);
+
+    // Remove user from event's registeredUsers
+    const updatedEventUsers = registeredUsers.filter(id => id !== userId);
+
+    // Update both documents
+    await Promise.all([
+      updateDoc(userRef, { registeredEvents: updatedUserEvents }),
+      updateDoc(eventRef, { registeredUsers: updatedEventUsers })
+    ]);
+
+    console.log('Successfully unregistered user from event');
+
   } catch (error) {
     console.error('Error unregistering for event:', error);
     throw error;
@@ -280,6 +303,26 @@ export const handleDeleteEvent = async (eventId, userId) => {
     
   } catch (error) {
     console.error('Error deleting event:', error);
+    throw error;
+  }
+};
+
+// Function to check if a user is registered for an event
+export const isUserRegisteredForEvent = async (userId, eventId) => {
+  try {
+    const eventRef = doc(firestore, 'events', eventId);
+    const eventSnap = await getDoc(eventRef);
+
+    if (!eventSnap.exists()) {
+      throw new Error('Event does not exist');
+    }
+
+    const eventData = eventSnap.data();
+    const registeredUsers = eventData.registeredUsers || [];
+
+    return registeredUsers.includes(userId);
+  } catch (error) {
+    console.error('Error checking user registration:', error);
     throw error;
   }
 };

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
-import { getEvents, registerForEvent, getAllRegisteredUsersForEvent } from '../firebase/firestore';
+import { getEvents, registerForEvent, getAllRegisteredUsersForEvent, isUserRegisteredForEvent } from '../firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { Calendar } from 'react-native-calendars';
 import axios from 'axios';
@@ -26,7 +26,8 @@ const Homepage = ({ navigation }) => {
   const [error, setError] = useState(null);
   const { currentUser } = useAuth();
   const isFocused = useIsFocused();
-  const [isUserRegistered, setisUserRegistered] = useState(false);
+  const [registrationStatus, setRegistrationStatus] = useState({});
+  // const [isUserRegistered, setisUserRegistered] = useState(false);
 
 
   const onRefresh = async () => {
@@ -139,19 +140,57 @@ fetchEvents();
     }
     setFilteredEvents(filtered);
   };
+
+  const checkRegistration = async (userId, eventId) => {
+    try {
+      const isRegistered = await isUserRegisteredForEvent(userId, eventId);
+      setRegistrationStatus(prev => ({ ...prev, [eventId]: isRegistered }));
+    } catch (error) {
+      console.error('Error checking registration:', error);
+      // Handle any errors
+    }
+  };
  
+  useEffect(() => {
+    if (currentUser) {
+    // Check registration status for all events
+    events.forEach(event => {
+      checkRegistration(currentUser.uid, event.id);
+    });
+    }
+  }, [events, currentUser]);
 
   useEffect(() => {
     filterEvents();
   }, [selectedSport, selectedDate, events]);
 
   const renderEventItem = ({ item }) => {
-    // const registeredUsers = await getAllRegisteredUsersForEvent(item.id); 
+    // const registeredUsers = getAllRegisteredUsersForEvent(item.id); 
     // if (registeredUsers && Array.isArray(registeredUsers)) {
-    //   if(registeredUsers.includes(currentUser.uid)){
-    //     setisUserRegistered(trrue);
+    //   if(registeredUsers.find(data => data.uid == currentUser.uid)){
+    //     setisUserRegistered(true);
     //   }
     // }
+    // let isUserRegistered = false;
+
+    // try {
+    //   const isRegistered = isUserRegisteredForEvent(currentUser.uid, item.id);
+    //   if (isRegistered) {
+    //     console.log('User is registered for this event');
+    //     isUserRegistered = true;
+    //     // Handle the case where the user is already registered
+    //   } else {
+    //     console.log('User is not registered for this event');
+    //     isUserRegistered = false;
+
+    //     // Handle the case where the user is not registered
+    //   }
+    // } catch (error) {
+    //   console.error('Error checking registration:', error);
+    //   // Handle any errors
+    // }
+
+    const isUserRegistered = registrationStatus[item.id] || false;
   
     return (
       <Card style={styles.eventCard}>
@@ -178,12 +217,12 @@ fetchEvents();
           <Button 
             mode="contained" 
             onPress={() => handleRegister(item.id)}
-            // disabled={isUserRegistered}
+            disabled={isUserRegistered}
             icon={({size, color}) => (
               <Ionicons name="add-circle-outline" size={size} color={color} />
             )}
           >
-            {/* {isUserRegistered ? 'Registered' : 'Register'} */}
+            {isUserRegistered ? 'Registered' : 'Register'}
           </Button>
         </Card.Actions>
       </Card>
