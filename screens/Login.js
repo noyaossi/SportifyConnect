@@ -5,14 +5,16 @@ import { View, Text, TextInput, ImageBackground, StyleSheet, TouchableOpacity, S
 import { loginUser } from '../firebase/auth';
 import commonStyles from '../styles/styles'; // Import common styles
 
-import loginStyle from '../styles/login';
-
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      return;
+    }
     try {
       await loginUser(email, password);
       // Navigate to the homepage upon successful login
@@ -29,6 +31,7 @@ const Login = ({ navigation }) => {
   return (
     <ImageBackground source={require('../assets/images/backgroundlogin.jpg')} style={commonStyles.backgroundImage}>
       <ScrollView contentContainerStyle={commonStyles.scrollContent}>
+      <Text style={commonStyles.title}>Log In</Text>
       <TextInput
         placeholder="Email"
         value={email}
