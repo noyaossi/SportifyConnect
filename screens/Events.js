@@ -1,11 +1,11 @@
 // screens/Events.js
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image  } from 'react-native';
-import { getEvents, getRegisteredEvents, unregisterForEvent, getCreatedEvents  } from '../firebase/firestore'; // Import function to fetch events and registered events from Firestore
-import { useAuth } from '../contexts/AuthContext'; // Import useAuth to get the current user
-import { Ionicons } from '@expo/vector-icons'; // Assuming you have installed expo vector icons
-import { useRefresh } from '../contexts/RefreshContext'; // Import RefreshContext
+import { View, Text, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
+// Import function to fetch events and registered events from Firestore
+import { getEvents, getRegisteredEvents, unregisterForEvent, getCreatedEvents  } from '../firebase/firestore'; 
+import { useAuth } from '../contexts/AuthContext'; 
+import { Ionicons } from '@expo/vector-icons'; 
 import ScreenContainer from '../components/ScreenContainer';
 import { useIsFocused } from '@react-navigation/native';
 import { Card, Button, Chip, Divider } from 'react-native-paper';

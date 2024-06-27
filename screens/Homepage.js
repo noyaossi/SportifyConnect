@@ -12,7 +12,8 @@ import ScreenContainer from '../components/ScreenContainer';
 import { useIsFocused } from '@react-navigation/native';
 import { Card, Button, Chip, Divider, IconButton } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
-const sportOptions = ['All Events', 'Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball', 'Events on Selected Date'];
+
+const sportOptions = ['All Events', 'Events on Selected Date', 'Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball', 'Yoga'];
 
 const Homepage = ({ navigation }) => {
   const [events, setEvents] = useState([]);
