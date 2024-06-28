@@ -14,7 +14,8 @@ const Profile = ({ navigation }) => {
   const [editing, setEditing] = useState(false);
   const [profilePicture, setProfilePicture] = useState('');
   const [loading, setLoading] = useState(true); 
-
+//to add a state var of was feched and when is is loaded ask whether it is stored in the sql or not
+// it was stored then load from it and if not crreate a table and udate it 
     const fetchUserData = async () => {
       if (!currentUser) {
         setLoading(false);
