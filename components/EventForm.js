@@ -1,29 +1,27 @@
-// components/EventForm.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Alert, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import ImagePickerComponent from '../components/ImagePickerComponent';
-import { Picker } from '@react-native-picker/picker';
+import RNPickerSelect from 'react-native-picker-select';
 import { Ionicons } from '@expo/vector-icons';
+
+const createDateFromTimeString = (timeString) => {
+  if (!timeString) {
+    return new Date();
+  }
+  const [hours, minutes, seconds] = timeString.split(':').map(Number);
+  const date = new Date();
+  date.setHours(hours);
+  date.setMinutes(minutes);
+  date.setSeconds(seconds);
+  return date;
+};
 
 const EventForm = ({ onSubmit, initialData = {} }) => {
   const [eventName, setEventName] = useState(initialData.eventName || '');
   const [sportType, setSportType] = useState(initialData.sportType || '');
   const [location, setLocation] = useState(initialData.location || '');
   const [date, setDate] = useState(initialData.date ? new Date(initialData.date) : new Date());
-
-  const createDateFromTimeString = (timeString) => {
-    if (!timeString) {
-      return new Date();
-    }
-    const [hours, minutes, seconds] = timeString.split(':').map(Number);
-    const date = new Date();
-    date.setHours(hours);
-    date.setMinutes(minutes);
-    date.setSeconds(seconds);
-    return date;
-  };
-
   const [time, setTime] = useState(createDateFromTimeString(initialData.time));
   const [participants, setParticipants] = useState(String(initialData.participants || ''));
   const [description, setDescription] = useState(initialData.description || '');
@@ -31,7 +29,17 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
-  const sportOptions = ['Basketball', 'Football', 'Tennis', 'Volleyball', 'Running', 'Cycling', 'Footvolley', 'Handball', 'Yoga'];
+  const sportOptions = [
+    { label: 'Basketball', value: 'Basketball' },
+    { label: 'Football', value: 'Football' },
+    { label: 'Tennis', value: 'Tennis' },
+    { label: 'Volleyball', value: 'Volleyball' },
+    { label: 'Running', value: 'Running' },
+    { label: 'Cycling', value: 'Cycling' },
+    { label: 'Footvolley', value: 'Footvolley' },
+    { label: 'Handball', value: 'Handball' },
+    { label: 'Yoga', value: 'Yoga' }
+  ];
 
   useEffect(() => {
     if (initialData.participants !== undefined) {
@@ -74,7 +82,6 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      
       <View style={styles.inputContainer}>
         <Ionicons name="calendar" size={24} color="#8A2BE2" style={styles.icon} />
         <TextInput
@@ -88,16 +95,17 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
 
       <View style={styles.inputContainer}>
         <Ionicons name="basketball" size={24} color="#8A2BE2" style={styles.icon} />
-        <Picker
-          selectedValue={sportType}
-          style={styles.picker}
-          onValueChange={(itemValue) => setSportType(itemValue)}
-        >
-          <Picker.Item label="Select Sport Type" value="" />
-          {sportOptions.map((sport) => (
-            <Picker.Item key={sport} label={sport} value={sport} />
-          ))}
-        </Picker>
+        <RNPickerSelect
+          onValueChange={(value) => setSportType(value)}
+          items={sportOptions}
+          placeholder={{ label: 'Select Sport Type', value: '' }}
+          style={pickerSelectStyles}
+          value={sportType}
+          useNativeAndroidPickerStyle={false}
+          Icon={() => {
+            return <Ionicons name="chevron-down" size={24} color="gray" />;
+          }}
+        />
       </View>
 
       <View style={styles.inputContainer}>
@@ -174,7 +182,6 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //backgroundColor: '#F0E6FF',
   },
   scrollContent: {
     padding: 20,
@@ -209,9 +216,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
-  picker: {
+  pickerTouchable: {
     flex: 1,
     height: 50,
+    justifyContent: 'center',
+  },
+  pickerText: {
+    fontSize: 16,
+    color: '#333',
   },
   dateText: {
     flex: 1,
@@ -234,6 +246,33 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: 'gray',
+    borderRadius: 4,
+    color: 'black',
+    paddingRight: 30, // to ensure the text is never behind the icon
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderWidth: 0.5,
+    borderColor: 'purple',
+    borderRadius: 8,
+    color: 'black',
+    paddingRight: 30, // to ensure the text is never behind the icon
+  },
+  iconContainer: {
+    top: Platform.OS === 'ios' ? 15 : 10,
+    right: 12,
   },
 });
 
