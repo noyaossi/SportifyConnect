@@ -1,7 +1,7 @@
 # SportifyConnect
 
 ## Introduction
-SportifyConnect is an innovative mobile application designed to bridge the gap between sports enthusiasts and recreational activities. Our platform facilitates the discovery, creation, and participation in sports events, fostering a vibrant community of active individuals. Built with cutting-edge technologies, SportifyConnect offers a seamless, cross-platform experience for both Android and iOS users.
+SportifyConnect is a mobile app that helps people find and join sports activities. Users can discover existing events, create new ones, and participate in various sports. The app builds a community of active people who love sports. It works smoothly on both Android and iOS devices, using modern technology to provide a great user experience.
 
 ## Project Overview
 In today's fast-paced world, finding time and companions for sports activities can be challenging. SportifyConnect addresses this issue by providing a user-friendly platform where individuals can easily connect with like-minded sports enthusiasts. Whether you're looking to join a casual soccer match, find a tennis partner, or organize a group hiking trip, SportifyConnect streamlines the process, making sports and outdoor activities more accessible than ever.
@@ -21,7 +21,7 @@ In today's fast-paced world, finding time and companions for sports activities c
 
 ### Discovery and Filtering
 - Browse events by date and sport type
-- 
+- Personalize the events for every user
 
 ### Weather Integration
 - Real-time weather information for event locations
@@ -87,17 +87,6 @@ In today's fast-paced world, finding time and companions for sports activities c
    npx expo start
    ```
 2. Use the Expo Go app on your mobile device to scan the QR code displayed in the terminal or in the Expo Dev Tools that open in the browser.
-
-### Building for Production
-To create a production build:
-1. For Android:
-   ```
-   expo build:android
-   ```
-2. For iOS:
-   ```
-   expo build:ios
-   ```
 
 ---
 
