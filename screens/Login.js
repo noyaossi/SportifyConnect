@@ -7,7 +7,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import ScreenContainer from '../components/ScreenContainer';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from 'react-native-paper';
-//import { useNavigation } from '@react-navigation/native';
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -54,13 +53,13 @@ const Login = ({ navigation }) => {
         await AsyncStorage.removeItem('email');
         await AsyncStorage.removeItem('password');
       }
- // Navigate to the homepage upon successful login
-  navigation.replace('Homepage');   
-  } catch (error) {
-      setError("Email or Password are Incorrect");
-    }
+      navigation.replace('Homepage');   
+      } 
+      catch (error) {
+        setError("Email or Password are Incorrect");
+      }
   };
-  
+
   const handleRegister = () => {
     navigation.navigate('Register'); 
   };

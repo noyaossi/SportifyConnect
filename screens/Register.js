@@ -2,11 +2,10 @@
 
 import React, { useState } from 'react';
 import { ScrollView, Text, TextInput, Alert, TouchableOpacity, StyleSheet, View, Image } from 'react-native';
-import { registerUser } from '../firebase/auth'; // Import registerUser from firebase/auth
-import { addUser } from '../firebase/firestore'; // Import addUser from firebase/firestore
-import commonStyles from '../styles/styles'; // Import common styles
-import ImagePickerComponent from '../components/ImagePickerComponent'; // Import ImagePickerComponent
-import { uploadImageToStorage } from '../firebase/storage'; // Import the upload image function
+import { registerUser } from '../firebase/auth'; 
+import { addUser } from '../firebase/firestore'; 
+import ImagePickerComponent from '../components/ImagePickerComponent'; 
+import { uploadImageToStorage } from '../firebase/storage'; 
 import ScreenContainer from '../components/ScreenContainer';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from 'react-native-paper';
@@ -50,8 +49,8 @@ const Register = ({ navigation }) => {
 
       await addUser(user.uid, userDetails);
       Alert.alert('Registration Successful', `Welcome ${user.email}`);
-      navigation.navigate('Login');
-    } catch (error) {
+      navigation.replace('Login')     
+     } catch (error) {
       const errorMessage = error.message;
       console.error('Error during registration:', error);
       Alert.alert('Registration Failed', errorMessage);
@@ -64,7 +63,7 @@ const Register = ({ navigation }) => {
         <Card style={styles.card}>
           <Card.Content>
           <Image
-              source={require('../assets/images/logo.png')} // Adjust the path to your logo image file
+              source={require('../assets/images/logo.png')} 
               style={styles.logo}
             />
             <Text style={styles.title}>Register</Text>
@@ -145,7 +144,7 @@ const Register = ({ navigation }) => {
               <Text style={styles.buttonText}>Register</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
+            <TouchableOpacity style={styles.loginButton} onPress={() => navigation.replace('Login')}>
               <Text style={styles.loginButtonText}>Already have an account? Login</Text>
             </TouchableOpacity>
           </Card.Content>
@@ -154,6 +153,8 @@ const Register = ({ navigation }) => {
     </ScreenContainer>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   container: {

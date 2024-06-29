@@ -1,8 +1,8 @@
 // screens/Homepage.js
 
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, ScrollView, RefreshControl, ActivityIndicator } from 'react-native';
-import { getEvents, registerForEvent, getAllRegisteredUsersForEvent, isUserRegisteredForEvent } from '../firebase/firestore';
+import { View, Text, FlatList, StyleSheet, ScrollView,  ActivityIndicator } from 'react-native';
+import { getEvents, registerForEvent, isUserRegisteredForEvent } from '../firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { Calendar } from 'react-native-calendars';
 import axios from 'axios';
@@ -27,7 +27,7 @@ const Homepage = ({ navigation }) => {
   const { currentUser } = useAuth();
   const isFocused = useIsFocused();
   const [registrationStatus, setRegistrationStatus] = useState({});
-  // const [isUserRegistered, setisUserRegistered] = useState(false);
+  
 
 
   const onRefresh = async () => {
@@ -93,7 +93,7 @@ fetchEvents();
         `https://api.openweathermap.org/data/2.5/weather?lat=${location.coords.latitude}&lon=${location.coords.longitude}&appid=${OPENWEATHERMAP_API_KEY}`
       );
       setWeatherData(response.data);
-      setError(null);  // Clear any previous errors
+      setError(null);  
     } catch (error) {
       console.error('Error fetching weather data:', error);
       setError(error.message);
@@ -147,13 +147,13 @@ fetchEvents();
       setRegistrationStatus(prev => ({ ...prev, [eventId]: isRegistered }));
     } catch (error) {
       console.error('Error checking registration:', error);
-      // Handle any errors
+      
     }
   };
  
   useEffect(() => {
     if (currentUser) {
-    // Check registration status for all events
+    
     events.forEach(event => {
       checkRegistration(currentUser.uid, event.id);
     });
@@ -165,31 +165,6 @@ fetchEvents();
   }, [selectedSport, selectedDate, events]);
 
   const renderEventItem = ({ item }) => {
-    // const registeredUsers = getAllRegisteredUsersForEvent(item.id); 
-    // if (registeredUsers && Array.isArray(registeredUsers)) {
-    //   if(registeredUsers.find(data => data.uid == currentUser.uid)){
-    //     setisUserRegistered(true);
-    //   }
-    // }
-    // let isUserRegistered = false;
-
-    // try {
-    //   const isRegistered = isUserRegisteredForEvent(currentUser.uid, item.id);
-    //   if (isRegistered) {
-    //     console.log('User is registered for this event');
-    //     isUserRegistered = true;
-    //     // Handle the case where the user is already registered
-    //   } else {
-    //     console.log('User is not registered for this event');
-    //     isUserRegistered = false;
-
-    //     // Handle the case where the user is not registered
-    //   }
-    // } catch (error) {
-    //   console.error('Error checking registration:', error);
-    //   // Handle any errors
-    // }
-
     const isUserRegistered = registrationStatus[item.id] || false;
   
     return (

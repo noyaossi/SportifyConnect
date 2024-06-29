@@ -6,9 +6,6 @@ const { height, width } = Dimensions.get('window');
 export default StyleSheet.create({
   fullScreenContainer: {
     flex: 1,
-    // width: width,
-    // height: height,
-    //backgroundColor: 'white', // or any color you prefer
   },
   container: {
     flex: 1,

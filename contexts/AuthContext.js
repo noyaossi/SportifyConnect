@@ -5,7 +5,6 @@ import { onAuthStateChanged, getAuth, signOut } from 'firebase/auth';
 import { initializeApp, getApps } from 'firebase/app';
 import firebaseConfig from '../firebase/firebaseConfig';
 
-// Initialize Firebase only if it hasn't been initialized yet
 if (!getApps().length) {
   initializeApp(firebaseConfig);
 }

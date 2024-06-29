@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
-// Import function to fetch events and registered events from Firestore
 import { getEvents, getRegisteredEvents, unregisterForEvent, getCreatedEvents  } from '../firebase/firestore'; 
 import { useAuth } from '../contexts/AuthContext'; 
 import { Ionicons } from '@expo/vector-icons'; 
@@ -16,21 +15,20 @@ const Events = ({ navigation }) => {
   const [registeredEvents, setRegisteredEvents] = useState([]);
   const [createdEvents, setCreatedEvents] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(false); // Define loading state
-  const { currentUser } = useAuth(); // Get the current user from AuthContext
+  const [loading, setLoading] = useState(false); 
+  const { currentUser } = useAuth(); 
   const isFocused = useIsFocused();
 
 
   const onRefresh = async () => {
     setRefreshing(true);
     try {
-      const eventsData = await getEvents(); // Fetch events data from Firestore
-      //to add if empty use the cache
-      setEvents(eventsData); // Update state with fetched events
-      const registeredEventsData = await getRegisteredEvents(currentUser.uid); // Fetch registered events data from Firestore
-      setRegisteredEvents(registeredEventsData); // Update registered events state
-      const createdEventsData = await getCreatedEvents(currentUser.uid); // Fetch created events data from Firestore
-      setCreatedEvents(createdEventsData); // Update created events state
+      const eventsData = await getEvents(); 
+      setEvents(eventsData); 
+      const registeredEventsData = await getRegisteredEvents(currentUser.uid);
+      setRegisteredEvents(registeredEventsData); 
+      const createdEventsData = await getCreatedEvents(currentUser.uid); 
+      setCreatedEvents(createdEventsData); 
     } catch (error) {
       console.error('Error fetching events:', error);
     } finally {
@@ -39,36 +37,34 @@ const Events = ({ navigation }) => {
   };
 
   useEffect(() => {
-    setLoading(true); // Set loading to true when fetching events
+    setLoading(true); 
     if (isFocused) {
-      // Refresh your data or perform other actions here
       onRefresh();
     }
 
-    // Fetch all events when the component mounts
     const fetchEvents = async () => {
       try {
-        const eventsData = await getEvents(); // Fetch events data from Firestore
-        setEvents(eventsData); // Update state with fetched events
-        const registeredEventsData = await getRegisteredEvents(currentUser.uid); // Fetch registered events data from Firestore
-        setRegisteredEvents(registeredEventsData); // Update registered events state
-        const createdEventsData = await getCreatedEvents(currentUser.uid); // Fetch created events data from Firestore
-        setCreatedEvents(createdEventsData); // Update created events state
+        const eventsData = await getEvents(); 
+        setEvents(eventsData); 
+        const registeredEventsData = await getRegisteredEvents(currentUser.uid); 
+        setRegisteredEvents(registeredEventsData); 
+        const createdEventsData = await getCreatedEvents(currentUser.uid); 
+        setCreatedEvents(createdEventsData); 
       } catch (error) {
         console.error('Error fetching events:', error);
       } finally {
-        setLoading(false); // Set loading to false after events are fetched
+        setLoading(false); 
       }
     };
 
-    fetchEvents(); // Call fetchEvents function
+    fetchEvents(); 
   }, [currentUser, isFocused]);
 
   const handleUnregister = async (eventId) => {
     try {
       await unregisterForEvent(currentUser.uid, eventId);
       alert('Unregistered successfully!');
-      onRefresh(); // Refresh the list of events
+      onRefresh();
     } catch (error) {
       console.error('Error unregistering from event:', error);
       alert('Error unregistering from event.');
@@ -83,14 +79,10 @@ const Events = ({ navigation }) => {
 
 // Function to format time
 const formatTime = (timeString) => {
-  //console.log("time in events:", timeString);
-
   if (!timeString) {
     return 'Invalid time2';
   }
-  // Split the time string into parts
   const [hour, minute] = timeString.split(':');
-  // Check if hour and minute are defined
   if (hour === undefined || minute === undefined) {
     return 'Invalid time2';
   }

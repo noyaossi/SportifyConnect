@@ -1,7 +1,6 @@
 // firebase/auth.js
 import { initializeApp, getApps } from 'firebase/app';
 import { 
-  getAuth, 
   initializeAuth, 
   getReactNativePersistence, 
   createUserWithEmailAndPassword, 
@@ -10,10 +9,7 @@ import {
   onAuthStateChanged 
 } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import firebaseConfig from './firebaseConfig'; // Import your firebaseConfig
-
-
-
+import firebaseConfig from './firebaseConfig'; 
 
 // Initialize Firebase only if it hasn't been initialized yet
 let app;
@@ -51,7 +47,7 @@ export const logoutUser = () => {
 export const checkLoginStatus = () => {
   return new Promise((resolve, reject) => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      unsubscribe(); // Unsubscribe from the listener as soon as we get the result
+      unsubscribe(); 
       resolve(user);
     }, reject);
   });

@@ -4,7 +4,7 @@ import EventForm from '../components/EventForm';
 import { getEvent, updateEvent, handleDeleteEvent } from '../firebase/firestore';
 import { useAuth } from '../contexts/AuthContext'; 
 import { uploadImage } from '../firebase/storage';
-import { Alert, Text, View, Button, StyleSheet, TouchableOpacity } from 'react-native'; // Import Alert, Text, View, Button, StyleSheet
+import { Alert, Text, View, StyleSheet, TouchableOpacity } from 'react-native'; 
 import ScreenContainer from '../components/ScreenContainer';
 
 
@@ -20,7 +20,7 @@ const EditEvent = ({ navigation, route }) => {
       try {
         const event = await getEvent(eventId);
  
-        event.participants = event.participants.toString(); // Ensure participants is a string for TextInput
+        event.participants = event.participants.toString(); 
         setInitialData(event);
       } catch (error) {
         console.error('Error fetching event:', error);
@@ -101,7 +101,6 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',
-    //marginTop: 20,
     alignSelf: 'center',
     width: 334,
   },
@@ -116,8 +115,6 @@ const styles = StyleSheet.create({
     color: '#8A2BE2',
     textAlign: 'center',
   },
-
-
 });
 
 export default EditEvent;

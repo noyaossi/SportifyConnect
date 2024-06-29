@@ -1,6 +1,5 @@
 // firebase/firebaseConfig.js
 
-
 const firebaseConfig = {
   apiKey: "AIzaSyA4GgMJBagvVsl1CvWL7zZK3XkoTbFSyRY",
   authDomain: "sportifyconnect-38c3a.firebaseapp.com",

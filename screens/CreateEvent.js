@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Alert, ScrollView, View, Platform, Text } from 'react-native';
-import { TextInput, Button, Title, List, Card } from 'react-native-paper';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
+import { StyleSheet, Alert, View, Text } from 'react-native';
 import { addEvent, createNewEvent } from '../firebase/firestore';
 import { uploadImage } from '../firebase/storage';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,8 +20,6 @@ const CreateEvent = ({ navigation }) => {
       }
       const eventToSubmit = {
         ...eventData,
-        // date: eventData.date.toISOString().split('T')[0],
-        // time: eventData.time.toTimeString().split(' ')[0],
         picture: pictureUrl,
       };
       const eventId = await addEvent(eventToSubmit);
@@ -43,10 +38,6 @@ const CreateEvent = ({ navigation }) => {
       <View style={styles.container}>
         <Text style={styles.header}>Create New Event</Text>
             <EventForm onSubmit={handleSubmit} />
-        {/* <Card style={styles.card}>
-          <Card.Content>
-          </Card.Content>
-        </Card> */}
       </View>
     </ScreenContainer>
   );
@@ -63,12 +54,6 @@ const styles = StyleSheet.create({
     color: '#8A2BE2',
     textAlign: 'center',
   },
-
-  // card: {
-  //   borderRadius: 8,
-  //   elevation: 4,
-  //   backgroundColor: 'white',
-  // },
 });
 
 export default CreateEvent;

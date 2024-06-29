@@ -6,8 +6,7 @@ import { getAnalytics, isSupported } from 'firebase/analytics';
 import firebaseConfig from './firebase/firebaseConfig';
 import AppNavigator from './navigation/AppNavigator';
 import AuthNavigator from './navigation/AuthNavigator';
-import { AuthProvider, useAuth } from './contexts/AuthContext'; // Import AuthProvider and useAuth
-import { RefreshProvider } from './contexts/RefreshContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext'; // Use the context to check auth state
 
 async function initializeFirebase() {
   if (!getApps().length) {
@@ -19,8 +18,8 @@ async function initializeFirebase() {
   }
 }
 
-function AppContent() {
-  const { currentUser } = useAuth(); // Access currentUser from AuthContext
+function App() {
+  const { currentUser } = useAuth();
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -38,19 +37,15 @@ function AppContent() {
 
   return (
     <NavigationContainer>
-      <RefreshProvider>
-        {currentUser ? <AppNavigator /> : <AuthNavigator />}
-      </RefreshProvider>
+      {currentUser ? <AppNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }
 
-function App() {
+export default function Main() {
   return (
     <AuthProvider>
-      <AppContent />
+      <App />
     </AuthProvider>
   );
 }
-
-export default App;

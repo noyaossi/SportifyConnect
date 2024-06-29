@@ -4,7 +4,6 @@ import { View, Text, TextInput, Image, TouchableOpacity, Alert, StyleSheet, Scro
 import { useAuth } from '../contexts/AuthContext';
 import { getUser, updateUser } from '../firebase/firestore';
 import ImagePickerComponent from '../components/ImagePickerComponent';
-import commonStyles from '../styles/styles';
 import ScreenContainer from '../components/ScreenContainer';
 import { Ionicons } from '@expo/vector-icons';
 import { initDB, saveUserProfile, getUserProfile, clearUserProfile } from '../services/DatabaseService';
@@ -237,15 +236,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 15,
-    //backgroundColor: 'white',
-    //borderRadius: 10,
     paddingHorizontal: 10,
-    //paddingVertical: 15,
-    //elevation: 2,
-    // shadowColor: '#000',
-    // shadowOffset: { width: 0, height: 2 },
-    // shadowOpacity: 0.1,
-    // shadowRadius: 2,
   },
   infoText: {
     flex: 1,

@@ -46,9 +46,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   image: {
-    width: 150, // Increased size
-    height: 150, // Increased size
-    borderRadius: 75, // Adjust border radius for a round image
+    width: 150, 
+    height: 150, 
+    borderRadius: 75, 
     marginTop: 10,
     marginBottom: 10,
   },

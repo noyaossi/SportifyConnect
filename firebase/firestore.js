@@ -79,10 +79,8 @@ export const getEvents = async () => {
 // Function to fetch a single event by ID
 export const getEvent = async (eventId) => {
   try {
-    //console.log(`Fetching event with ID: ${eventId}`);
     const eventDoc = await getDoc(doc(firestore, 'events', eventId));
     if (eventDoc.exists()) {
-      //console.log(`Event found: ${JSON.stringify(eventDoc.data())}`);
       return { id: eventDoc.id, ...eventDoc.data() };
     } else {
       throw new Error('Event not found');
@@ -187,13 +185,10 @@ export const unregisterForEvent = async (userId, eventId) => {
       throw new Error('User not registered for this event');
     }
 
-    // Remove event from user's registeredEvents
     const updatedUserEvents = registeredEvents.filter(id => id !== eventId);
 
-    // Remove user from event's registeredUsers
     const updatedEventUsers = registeredUsers.filter(id => id !== userId);
 
-    // Update both documents
     await Promise.all([
       updateDoc(userRef, { registeredEvents: updatedUserEvents }),
       updateDoc(eventRef, { registeredUsers: updatedEventUsers })
@@ -225,7 +220,6 @@ export const getRegisteredEvents = async (userId) => {
       const registeredEvents = await Promise.all(eventsPromises);
       return registeredEvents;
     } else {
-      // Return an empty array if no registered events
       return [];
     }
   } catch (error) {
@@ -252,7 +246,6 @@ export const getCreatedEvents = async (userId) => {
       const createdEvents = await Promise.all(eventsPromises);
       return createdEvents;
     } else {
-      // Return an empty array if no created new events
       return [];
     }
   } catch (error) {
@@ -272,11 +265,9 @@ export const handleDeleteEvent = async (eventId, userId) => {
     const eventData = eventSnap.data();
     const registeredUsers = eventData.registeredUsers || [];
 
-    // Delete the event document
     await deleteDoc(eventRef);
     console.log('Event deleted successfully!');
 
-    // Update the created events list of the user who created the event
     const userRef = doc(firestore, 'users', userId);
     const userSnap = await getDoc(userRef);
  
@@ -289,7 +280,6 @@ export const handleDeleteEvent = async (eventId, userId) => {
       throw new Error('User not found');
     }
 
-    // Remove the event from the registered events list of each registered user
     await Promise.all(registeredUsers.map(async (user) => {
       const userRef = doc(firestore, 'users', user);
       const userSnap = await getDoc(userRef);
@@ -327,28 +317,5 @@ export const isUserRegisteredForEvent = async (userId, eventId) => {
   }
 };
 
-// export const getAllRegisteredUsersForEvent = async (eventId) => {
-//   try {
-//     const eventRef = doc(firestore, 'events', eventId);
-//     const eventSnap = await getDoc(eventRef);
-//     if (!eventSnap.exists()) {
-//       throw new Error('Event does not exist');
-//     }
-//     const eventData = eventSnap.data();
-//     const registeredUsers = eventData.registeredUsers || [];
-
-//     return registeredUsers;
-//     // const usersPromises = registeredUsers.map(async (userId) => {
-//     //   const userDoc = await getDoc(doc(firestore, 'users', userId));
-//     //   return { id: userDoc.id, ...userDoc.data() };
-//     // });
-
-//     // const registeredUsersData = await Promise.all(usersPromises);
-//     // return registeredUsersData;
-//   } catch (error) {
-//     console.error('Error fetching registered users:', error);
-//     throw error;
-//   }
-// };
 
 export default firestore;
