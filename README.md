@@ -1,4 +1,4 @@
-﻿# SportifyConnect
+# SportifyConnect
 
 ## Introduction
 SportifyConnect is a mobile app that helps people find and join sports activities. Users can discover existing events, create new ones, and participate in various sports. The app builds a community of active people who love sports. It works smoothly on both Android and iOS devices, using modern technology to provide a great user experience.
