@@ -20,7 +20,7 @@ const Login = ({ navigation }) => {
   const navigation2 = useNavigation();
   
   const navigateToHomepage = () => {
-    navigation2.navigate('Homepage'); 
+    navigation2.replace('Homepage'); 
   }
 
 
@@ -63,9 +63,6 @@ const Login = ({ navigation }) => {
         await AsyncStorage.removeItem('email');
         await AsyncStorage.removeItem('password');
       }
-
-      // Navigate to the homepage upon successful login
-      //navigation.navigate('Homepage');
       navigateToHomepage();
     } catch (error) {
       setError("Email or Password are Incorrect");

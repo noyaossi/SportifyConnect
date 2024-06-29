@@ -44,6 +44,9 @@ function App() {
     initializeAuth();
   }, []);
 
+  const handleAuthentication = (authStatus) => {
+    setIsAuthenticated(authStatus);
+  };
   
   if (isLoading) {
     return (
@@ -57,12 +60,15 @@ function App() {
   return (
     <AuthProvider>
       <NavigationContainer>
-      <RefreshProvider>
-        {isAuthenticated ? <AppNavigator /> : <AuthNavigator />}
+        <RefreshProvider>
+          {isAuthenticated ? (
+            <AppNavigator />
+          ) : (
+            <AuthNavigator onAuthenticate={handleAuthentication} />
+          )}
         </RefreshProvider>
       </NavigationContainer>
     </AuthProvider>
-  );
-}
+  );}
 
 export default App;
