@@ -162,7 +162,7 @@ const EventForm = ({ onSubmit, initialData = {} }) => {
         />
       </View>
 
-      <ImagePickerComponent initialImage={picture} onImagePicked={setPicture} buttonText="Change Event Image" />
+      <ImagePickerComponent initialImage={picture} onImagePicked={setPicture} buttonText="Upload Event Image" />
 
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitButtonText}>Submit</Text>
