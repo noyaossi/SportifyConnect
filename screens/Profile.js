@@ -7,6 +7,7 @@ import ImagePickerComponent from '../components/ImagePickerComponent';
 import commonStyles from '../styles/styles';
 import ScreenContainer from '../components/ScreenContainer';
 import { Ionicons } from '@expo/vector-icons';
+import { initDB, saveUserProfile, getUserProfile } from '../services/DatabaseService';
 
 const Profile = ({ navigation }) => {
   const { currentUser, logout } = useAuth();
@@ -16,41 +17,57 @@ const Profile = ({ navigation }) => {
   const [loading, setLoading] = useState(true); 
 //to add a state var of was feched and when is is loaded ask whether it is stored in the sql or not
 // it was stored then load from it and if not crreate a table and udate it 
-    const fetchUserData = async () => {
-      if (!currentUser) {
-        setLoading(false);
-      return;
-      }
-      try {
-        const data = await getUser(currentUser.uid);
-        setUserData(data);
-        setProfilePicture(data.profilepicture);
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+useEffect(() => {
+  const setup = async () => {
+    try {
+      await initDB();
+      await fetchUserData();
+    } catch (error) {
+      console.error('Error setting up AsyncStorage:', error);
+    }
+  };
+  setup();
+}, [currentUser]);
 
-    useEffect(() => {
-      fetchUserData();
-    }, [currentUser]);
+const fetchUserData = async () => {
+  if (!currentUser) {
+    setLoading(false);
+    return;
+  }
+  try {
+    const cachedData = await getUserProfile(currentUser.uid);
+    if (cachedData) {
+      setUserData(cachedData);
+      setProfilePicture(cachedData.profilepicture);
+    } else {
+      const data = await getUser(currentUser.uid);
+      setUserData(data);
+      setProfilePicture(data.profilepicture);
+      await saveUserProfile(currentUser.uid, data);
+    }
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
-    const handleUpdate = async () => {
-      if (!currentUser) return;
-      try {
-        const updatedUser = {
-          ...userData,
-          profilepicture: profilePicture,
-        };
-        await updateUser(currentUser.uid, updatedUser);
-        Alert.alert('Profile Updated', 'Your profile has been updated successfully.');
-        setEditing(false);
-      } catch (error) {
-        console.error('Error updating user data:', error);
-        Alert.alert('Update Failed', 'Failed to update profile. Please try again.');
-      }
+const handleUpdate = async () => {
+  if (!currentUser) return;
+  try {
+    const updatedUser = {
+      ...userData,
+      profilepicture: profilePicture,
     };
+    await updateUser(currentUser.uid, updatedUser);
+    await saveUserProfile(currentUser.uid, updatedUser);
+    Alert.alert('Profile Updated', 'Your profile has been updated successfully.');
+    setEditing(false);
+  } catch (error) {
+    console.error('Error updating user data:', error);
+    Alert.alert('Update Failed', 'Failed to update profile. Please try again.');
+  }
+};
   
   const handleLogout = async () => {
     try {
