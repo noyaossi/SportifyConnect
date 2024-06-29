@@ -49,11 +49,14 @@ const Register = ({ navigation }) => {
 
       await addUser(user.uid, userDetails);
       Alert.alert('Registration Successful', `Welcome ${user.email}`);
-      navigation.replace('Login')     
+      navigation.replace('Login');
      } catch (error) {
       const errorMessage = error.message;
-      console.error('Error during registration:', error);
-      Alert.alert('Registration Failed', errorMessage);
+      console.log('Error during registration:', error);
+      if (errorMessage =="Firebase: Error (auth/email-already-in-use)."){
+          Alert.alert('Registration Failed', 'Email already in use');
+      } 
+      else {Alert.alert('Registration Failed');}
     } 
   };
 
