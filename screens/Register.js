@@ -1,7 +1,7 @@
 // screens/Register.js
 
 import React, { useState } from 'react';
-import { ScrollView, Text, TextInput, Alert, TouchableOpacity, StyleSheet, View } from 'react-native';
+import { ScrollView, Text, TextInput, Alert, TouchableOpacity, StyleSheet, View, Image } from 'react-native';
 import { registerUser } from '../firebase/auth'; // Import registerUser from firebase/auth
 import { addUser } from '../firebase/firestore'; // Import addUser from firebase/firestore
 import commonStyles from '../styles/styles'; // Import common styles
@@ -63,6 +63,10 @@ const Register = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.container}>
         <Card style={styles.card}>
           <Card.Content>
+          <Image
+              source={require('../assets/images/logo.png')} // Adjust the path to your logo image file
+              style={styles.logo}
+            />
             <Text style={styles.title}>Register</Text>
             
             <View style={styles.inputContainer}>
@@ -170,6 +174,12 @@ const styles = StyleSheet.create({
     color: '#8A2BE2',
     marginBottom: 20,
     textAlign: 'center',
+  },
+  logo: {
+    width: 400,
+    height: 100,
+    resizeMode: 'contain',
+    alignSelf: 'center',
   },
   inputContainer: {
     flexDirection: 'row',

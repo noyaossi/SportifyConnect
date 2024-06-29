@@ -1,4 +1,5 @@
 // components/ImagePickerComponent.js
+
 import React, { useState, useEffect } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';

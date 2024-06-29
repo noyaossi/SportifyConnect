@@ -7,7 +7,6 @@ import { useNavigation } from '@react-navigation/native';
 
 const BottomNavigationBar = () => {
   const navigation = useNavigation();
-
   const handleNavigate = (screenName) => {
     navigation.navigate(screenName);
   };
@@ -33,13 +32,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     backgroundColor: '#fff',
-    position: 'absolute', // Position the bar at the bottom
-    bottom: 0, // Align it to the bottom of the screen
-    width: '100%', // Take up the full width
+    position: 'absolute', 
+    bottom: 0, 
+    width: '100%', 
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderTopWidth: 1, // Add a border at the top
-    borderTopColor: '#ccc', // Border color
+    borderTopWidth: 1, 
+    borderTopColor: '#ccc', 
   },
   icon: {
     width: 30,

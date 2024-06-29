@@ -1,7 +1,7 @@
 // screens/Login.js
 
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, Switch, Pressable } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, Switch, Image } from 'react-native';
 import { loginUser } from '../firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import commonStyles from '../styles/styles'; // Import common styles
@@ -9,7 +9,6 @@ import ScreenContainer from '../components/ScreenContainer';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -23,18 +22,15 @@ const Login = ({ navigation }) => {
     navigation2.replace('Homepage'); 
   }
 
-
   useEffect(() => {
     const loadCredentials = async () => {
       try {
-        // if (rememberMe){
-            const savedEmail = await AsyncStorage.getItem('email');
-            const savedPassword = await AsyncStorage.getItem('password');
-            if (savedEmail && savedPassword) {
-              setEmail(savedEmail);
-              setPassword(savedPassword);
-              setRememberMe(true);
-            // }
+        const savedEmail = await AsyncStorage.getItem('email');
+        const savedPassword = await AsyncStorage.getItem('password');
+        if (savedEmail && savedPassword) {
+          setEmail(savedEmail);
+          setPassword(savedPassword);
+          setRememberMe(true);
         }
       } catch (error) {
         console.log('Failed to load credentials', error);
@@ -68,16 +64,20 @@ const Login = ({ navigation }) => {
       setError("Email or Password are Incorrect");
     }
   };
+  
   const handleRegister = () => {
     navigation.navigate('Register'); 
   };
 
-  
   return (
     <ScreenContainer loading={false} onRefresh={() => {}} navigation={navigation} hideBottomNav>
       <View style={styles.container}>
         <Card style={styles.card}>
           <Card.Content>
+            <Image
+              source={require('../assets/images/logo.png')} // Adjust the path to your logo image file
+              style={styles.logo}
+            />
             <Text style={styles.title}>Log In</Text>
             <View style={styles.inputContainer}>
               <Ionicons name="mail" size={24} color="#8A2BE2" style={styles.icon} />
@@ -139,6 +139,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
     elevation: 3,
+  },
+  logo: {
+    width: 400,
+    height: 100,
+    resizeMode: 'contain',
+    alignSelf: 'center',
   },
   title: {
     fontSize: 28,
@@ -202,4 +208,3 @@ const styles = StyleSheet.create({
 });
 
 export default Login;
-

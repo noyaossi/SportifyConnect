@@ -1,4 +1,5 @@
 // components/ScreenContainer.js
+
 import React from 'react';
 import { View, ActivityIndicator, RefreshControl, ScrollView } from 'react-native';
 import BottomNavigationBar from '../components/BottomNavigationBar';

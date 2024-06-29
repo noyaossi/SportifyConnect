@@ -1,3 +1,5 @@
+// contexts/AuthContext.js
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { onAuthStateChanged, getAuth, signOut } from 'firebase/auth';
 import { initializeApp, getApps } from 'firebase/app';
