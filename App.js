@@ -6,11 +6,8 @@ import { getAnalytics, isSupported } from 'firebase/analytics';
 import firebaseConfig from './firebase/firebaseConfig';
 import AppNavigator from './navigation/AppNavigator';
 import AuthNavigator from './navigation/AuthNavigator';
-import { checkLoginStatus } from './firebase/auth';
-import { AuthProvider } from './contexts/AuthContext'; // Import AuthProvider
+import { AuthProvider, useAuth } from './contexts/AuthContext'; // Import AuthProvider and useAuth
 import { RefreshProvider } from './contexts/RefreshContext';
-
-
 
 async function initializeFirebase() {
   if (!getApps().length) {
@@ -22,31 +19,15 @@ async function initializeFirebase() {
   }
 }
 
-function App() {
+function AppContent() {
+  const { currentUser } = useAuth(); // Access currentUser from AuthContext
   const [isLoading, setIsLoading] = React.useState(true);
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
 
   React.useEffect(() => {
     initializeFirebase();
-
-    const initializeAuth = async () => {
-      try {
-        const user = await checkLoginStatus();
-        setIsAuthenticated(!!user);
-      } catch (error) {
-        console.error('Error checking login status:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initializeAuth();
+    setIsLoading(false); // Assuming you handle authentication state changes in AuthContext
   }, []);
 
-  const handleAuthentication = (authStatus) => {
-    setIsAuthenticated(authStatus);
-  };
-  
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -55,19 +36,21 @@ function App() {
     );
   }
 
+  return (
+    <NavigationContainer>
+      <RefreshProvider>
+        {currentUser ? <AppNavigator /> : <AuthNavigator />}
+      </RefreshProvider>
+    </NavigationContainer>
+  );
+}
 
+function App() {
   return (
     <AuthProvider>
-      <NavigationContainer>
-        <RefreshProvider>
-          {isAuthenticated ? (
-            <AppNavigator />
-          ) : (
-            <AuthNavigator onAuthenticate={handleAuthentication} />
-          )}
-        </RefreshProvider>
-      </NavigationContainer>
+      <AppContent />
     </AuthProvider>
-  );}
+  );
+}
 
 export default App;

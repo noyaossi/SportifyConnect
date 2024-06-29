@@ -4,11 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, Switch, Image } from 'react-native';
 import { loginUser } from '../firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import commonStyles from '../styles/styles'; // Import common styles
 import ScreenContainer from '../components/ScreenContainer';
 import { Ionicons } from '@expo/vector-icons';
 import { Card } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+//import { useNavigation } from '@react-navigation/native';
 
 const Login = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -16,11 +15,7 @@ const Login = ({ navigation }) => {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const navigation2 = useNavigation();
   
-  const navigateToHomepage = () => {
-    navigation2.replace('Homepage'); 
-  }
 
   useEffect(() => {
     const loadCredentials = async () => {
@@ -59,8 +54,9 @@ const Login = ({ navigation }) => {
         await AsyncStorage.removeItem('email');
         await AsyncStorage.removeItem('password');
       }
-      navigateToHomepage();
-    } catch (error) {
+ // Navigate to the homepage upon successful login
+  navigation.replace('Homepage');   
+  } catch (error) {
       setError("Email or Password are Incorrect");
     }
   };
