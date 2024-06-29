@@ -7,7 +7,8 @@ import ImagePickerComponent from '../components/ImagePickerComponent';
 import commonStyles from '../styles/styles';
 import ScreenContainer from '../components/ScreenContainer';
 import { Ionicons } from '@expo/vector-icons';
-import { initDB, saveUserProfile, getUserProfile } from '../services/DatabaseService';
+import { initDB, saveUserProfile, getUserProfile, clearUserProfile } from '../services/DatabaseService';
+import { uploadImageToStorage } from '../firebase/storage';
 
 const Profile = ({ navigation }) => {
   const { currentUser, logout } = useAuth();
@@ -15,9 +16,8 @@ const Profile = ({ navigation }) => {
   const [editing, setEditing] = useState(false);
   const [profilePicture, setProfilePicture] = useState('');
   const [loading, setLoading] = useState(true); 
-//to add a state var of was feched and when is is loaded ask whether it is stored in the sql or not
-// it was stored then load from it and if not crreate a table and udate it 
-useEffect(() => {
+
+  useEffect(() => {
   const setup = async () => {
     try {
       await initDB();
@@ -55,9 +55,11 @@ const fetchUserData = async () => {
 const handleUpdate = async () => {
   if (!currentUser) return;
   try {
+    const profilePictureUrl = await uploadImageToStorage(profilePicture);
+
     const updatedUser = {
       ...userData,
-      profilepicture: profilePicture,
+      profilepicture: profilePictureUrl,
     };
     await updateUser(currentUser.uid, updatedUser);
     await saveUserProfile(currentUser.uid, updatedUser);
@@ -69,14 +71,17 @@ const handleUpdate = async () => {
   }
 };
   
-  const handleLogout = async () => {
-    try {
-      await logout();
-      navigation.navigate('Login');
-    } catch (error) {
-      console.error('Error logging out:', error);
+const handleLogout = async () => {
+  try {
+    if (currentUser) {
+      await clearUserProfile(currentUser.uid);
     }
-  };
+    await logout();
+    navigation.navigate('Login');
+  } catch (error) {
+    console.error('Error logging out:', error);
+  }
+};
 
   return (
     <ScreenContainer loading={loading} onRefresh={fetchUserData} navigation={navigation}>
